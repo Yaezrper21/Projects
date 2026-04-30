@@ -26,6 +26,7 @@
     </header>
 
     <main>
+      <section class="session-banner panel" data-session-banner></section>
       <section class="panel">
         <div class="subnav">
           <button class="subnav-link active" data-library-tab="genre">Genre</button>
@@ -35,22 +36,7 @@
         </div>
 
         <div class="library-view active" id="library-genre">
-          <div class="genre-section">
-            <p class="panel-title">Action</p>
-            <div class="book-row" id="genre-action"></div>
-          </div>
-          <div class="genre-section">
-            <p class="panel-title">Comedy</p>
-            <div class="book-row" id="genre-comedy"></div>
-          </div>
-          <div class="genre-section">
-            <p class="panel-title">Drama</p>
-            <div class="book-row" id="genre-drama"></div>
-          </div>
-          <div class="genre-section">
-            <p class="panel-title">Horror</p>
-            <div class="book-row" id="genre-horror"></div>
-          </div>
+          <div data-genre-sections></div>
         </div>
 
         <div class="library-view" id="library-popular">
@@ -73,6 +59,7 @@
     </main>
   </div>
 
+  <script src="auth.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

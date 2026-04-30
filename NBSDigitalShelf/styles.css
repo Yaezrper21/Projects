@@ -1,14 +1,27 @@
 :root {
-  --bg: #f7f2ec;
-  --panel: #fffdf9;
-  --line: #d4c2b7;
-  --line-strong: #bc9a88;
-  --text: #2c1916;
-  --muted: #755957;
-  --red: #b21f24;
-  --red-deep: #8f151b;
-  --red-soft: #f5d9da;
-  --shadow: 0 16px 36px rgba(111, 41, 28, 0.08);
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --line: #e7e7e7;
+  --line-strong: #cfcfcf;
+  --text: #171717;
+  --muted: #5f5f5f;
+  --red: #171717;
+  --red-deep: #111111;
+  --red-soft: #f5f5f5;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f0f10;
+  --panel: #171718;
+  --line: #2d2d31;
+  --line-strong: #44444c;
+  --text: #f5f5f5;
+  --muted: #bbbbc2;
+  --red: #ffffff;
+  --red-deep: #ffffff;
+  --red-soft: #242428;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
 * {
@@ -23,9 +36,7 @@ body {
   margin: 0;
   font-family: "Instrument Sans", "Segoe UI", sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(178, 31, 36, 0.08), transparent 24rem),
-    linear-gradient(180deg, #fffaf5 0%, var(--bg) 100%);
+  background: var(--bg);
 }
 
 button,
@@ -39,8 +50,8 @@ button {
 }
 
 .site-shell {
-  width: min(1120px, calc(100vw - 32px));
-  margin: 24px auto 48px;
+  width: calc(100vw - 48px);
+  margin: 18px 24px 40px;
 }
 
 .topbar {
@@ -54,7 +65,7 @@ button {
   padding: 18px 22px;
   margin-bottom: 18px;
   border: 1px solid var(--line);
-  background: rgba(255, 253, 249, 0.92);
+  background: color-mix(in srgb, var(--panel) 96%, transparent);
   backdrop-filter: blur(14px);
   box-shadow: var(--shadow);
 }
@@ -79,20 +90,21 @@ button {
 .nav-link,
 .subnav-link,
 .ghost-button {
-  border: 1px solid transparent;
+  border: 0;
   background: transparent;
   padding: 8px 10px;
   text-transform: uppercase;
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   color: var(--muted);
+  text-decoration: none;
 }
 
 .nav-link.active,
 .subnav-link.active {
-  color: var(--red-deep);
-  border-color: var(--line);
-  background: linear-gradient(180deg, #fff 0%, #fbf0ef 100%);
+  color: var(--text);
+  background: transparent;
+  font-weight: 700;
 }
 
 .page {
@@ -141,9 +153,7 @@ button {
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
-  background:
-    linear-gradient(135deg, rgba(178, 31, 36, 0.08), transparent 45%),
-    linear-gradient(180deg, #fffefe 0%, #fdf5f2 100%);
+  background: var(--panel);
 }
 
 .eyebrow,
@@ -183,7 +193,7 @@ button {
 .order-card,
 .search-result {
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, #fff 0%, #fdf8f6 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fff6f6 100%);
 }
 
 .list-line {
@@ -221,8 +231,8 @@ button {
   padding: 12px;
   border: 1px solid var(--line);
   background:
-    linear-gradient(180deg, rgba(178, 31, 36, 0.05), transparent 28%),
-    linear-gradient(180deg, #fff 0%, #fdfaf8 100%);
+    linear-gradient(180deg, rgba(207, 32, 39, 0.08), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -239,14 +249,54 @@ button {
   aspect-ratio: 0.78;
   border: 1px solid var(--line);
   background:
-    linear-gradient(135deg, rgba(178, 31, 36, 0.12), transparent 50%),
-    linear-gradient(180deg, #fffefe 0%, #f7ece7 100%);
+    linear-gradient(135deg, rgba(207, 32, 39, 0.12), transparent 50%),
+    linear-gradient(180deg, #ffffff 0%, #ffe7e7 100%);
+  overflow: hidden;
+}
+
+.book-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.book-cover-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-family: "League Spartan", sans-serif;
+  font-size: 1.8rem;
+  color: var(--red-deep);
+}
+
+.book-description {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--muted);
 }
 
 .book-meta {
   display: grid;
   gap: 4px;
   margin-top: 10px;
+}
+
+.book-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.book-stats.wide {
+  margin-top: 14px;
 }
 
 .book-title {
@@ -259,6 +309,10 @@ button {
   margin: 0;
   font-size: 0.74rem;
   color: var(--muted);
+}
+
+.interactive-card {
+  cursor: default;
 }
 
 .cta-strip {
@@ -274,6 +328,23 @@ button {
   border: 1px solid var(--line);
   background: var(--panel);
   box-shadow: var(--shadow);
+}
+
+.session-banner {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--panel);
+}
+
+.session-banner strong {
+  color: var(--red-deep);
 }
 
 .subnav {
@@ -301,7 +372,7 @@ button {
 .text-input {
   width: 100%;
   border: 1px solid var(--line-strong);
-  background: #fff;
+  background: var(--panel);
   padding: 11px 12px;
   color: var(--text);
 }
@@ -327,7 +398,7 @@ button {
 .primary-button {
   border: 1px solid var(--red-deep);
   background: linear-gradient(180deg, var(--red) 0%, var(--red-deep) 100%);
-  color: #fff7f5;
+  color: #ffffff;
 }
 
 .primary-button.compact {
@@ -342,7 +413,7 @@ button {
 .ghost-button {
   border: 1px solid var(--line);
   color: var(--red-deep);
-  background: transparent;
+  background: var(--panel);
 }
 
 .transaction-panel {
@@ -417,8 +488,8 @@ button {
   place-items: center;
   border: 1px solid var(--line);
   background:
-    radial-gradient(circle at top, rgba(178, 31, 36, 0.12), transparent 40%),
-    linear-gradient(180deg, #fff 0%, #f9efea 100%);
+    radial-gradient(circle at top, rgba(207, 32, 39, 0.14), transparent 40%),
+    linear-gradient(180deg, #ffffff 0%, #fff1f1 100%);
 }
 
 .avatar-placeholder span {
@@ -460,6 +531,13 @@ button {
   justify-items: center;
 }
 
+.auth-form,
+.dashboard-form {
+  width: min(340px, 100%);
+  display: grid;
+  gap: 10px;
+}
+
 .auth-title {
   margin: 0 0 8px;
   text-transform: uppercase;
@@ -472,6 +550,383 @@ button {
 .auth-panel .primary-button,
 .auth-panel .ghost-button {
   width: min(320px, 100%);
+}
+
+.social-row {
+  width: min(320px, 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.social-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+}
+
+.social-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.auth-seed-copy,
+.feedback-strip,
+.muted-copy {
+  margin: 0;
+  text-align: center;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.feedback-strip {
+  min-height: 18px;
+}
+
+.feedback-strip[data-state="error"] {
+  color: var(--red-deep);
+}
+
+.feedback-strip[data-state="success"] {
+  color: var(--red-deep);
+}
+
+.feedback-strip[data-state="info"] {
+  color: var(--muted);
+}
+
+.dashboard-shell {
+  padding: 18px;
+}
+
+.dashboard-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.dashboard-heading h1 {
+  margin: 6px 0 0;
+  max-width: 18ch;
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.dashboard-card {
+  border: 1px solid var(--line);
+  padding: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff7f7 100%);
+}
+
+.management-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.management-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+
+.media-card {
+  align-items: stretch;
+}
+
+.management-media {
+  width: 78px;
+  min-width: 78px;
+  height: 108px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--red-soft);
+}
+
+.management-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.management-content {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+}
+
+.management-card p,
+.management-card span {
+  margin: 0;
+}
+
+.management-card span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.dashboard-profile {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.avatar-placeholder.small {
+  min-height: 108px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.stat-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(207, 32, 39, 0.12), transparent 50%),
+    linear-gradient(180deg, #ffffff 0%, #fff1f1 100%);
+}
+
+.stat-card span,
+.stat-card strong {
+  display: block;
+}
+
+.stat-card span {
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.stat-card strong {
+  font-family: "League Spartan", sans-serif;
+  font-size: 2.2rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.account-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.account-table th,
+.account-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 0.84rem;
+}
+
+.table-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.wrap-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.inline {
+  width: auto;
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+.danger {
+  color: var(--red-deep);
+}
+
+.compact-ghost {
+  width: auto;
+}
+
+.order-actions {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.text-area-input {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.chapter-area {
+  min-height: 220px;
+}
+
+.file-input {
+  padding: 10px;
+}
+
+.empty-shelf {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px dashed var(--line-strong);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  background: var(--panel);
+}
+
+.align-left {
+  text-align: left;
+}
+
+.nav-utility-button {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding-inline: 14px;
+  background: var(--panel);
+}
+
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(127, 15, 20, 0.58);
+}
+
+.modal-panel {
+  position: relative;
+  width: min(980px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  margin: 12px auto;
+  padding: 18px;
+  overflow: auto;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  box-shadow: 0 30px 60px rgba(161, 15, 22, 0.22);
+}
+
+.modal-close {
+  position: sticky;
+  top: 0;
+  margin-left: auto;
+  display: block;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--red-deep);
+  padding: 10px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+}
+
+.book-detail {
+  display: grid;
+  gap: 18px;
+}
+
+.book-detail-hero {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 18px;
+}
+
+.book-detail-cover {
+  min-height: 360px;
+  border: 1px solid var(--line);
+  background: var(--red-soft);
+}
+
+.book-detail-copy h2 {
+  margin: 8px 0 12px;
+  font-family: "League Spartan", sans-serif;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--red-deep);
+}
+
+.chapter-reader-list {
+  display: grid;
+  gap: 14px;
+}
+
+.chapter-card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 14px;
+}
+
+.chapter-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.chapter-title,
+.chapter-meta {
+  margin: 0;
+}
+
+.chapter-title {
+  font-weight: 700;
+}
+
+.chapter-meta {
+  margin-top: 4px;
+  font-size: 0.76rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.chapter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chapter-content {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  line-height: 1.7;
+}
+
+.chapter-content p {
+  margin: 0;
 }
 
 .checkbox-row {
@@ -513,12 +968,18 @@ button {
   .book-grid.tall {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .dashboard-grid,
+  .stats-grid,
+  .book-detail-hero {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 640px) {
   .site-shell {
-    width: min(100vw - 20px, 1120px);
-    margin-top: 10px;
+    width: calc(100vw - 20px);
+    margin: 10px 10px 32px;
   }
 
   .topbar {
@@ -542,8 +1003,23 @@ button {
   }
 
   .order-card,
-  .search-result {
+  .search-result,
+  .dashboard-heading,
+  .management-card,
+  .session-banner,
+  .dashboard-profile,
+  .chapter-card-top {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .social-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-panel {
+    width: min(100vw - 14px, 980px);
+    margin: 7px auto;
+    padding: 14px;
   }
 }

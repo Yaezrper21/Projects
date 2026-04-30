@@ -26,27 +26,22 @@
     </header>
 
     <main>
+      <section class="session-banner panel" data-session-banner></section>
       <div class="search-bar-row">
         <span class="brand-inline">NBS Digital Shelf</span>
-        <input class="text-input grow" type="search" placeholder="Search...">
-        <button class="primary-button compact">Search</button>
+        <input class="text-input grow" type="search" placeholder="Search..." data-search-input>
+        <button class="primary-button compact" type="button" data-search-button>Search</button>
       </div>
-      <section class="panel search-results">
+      <section class="panel search-results" data-search-results>
         <div class="search-result">
-          <p class="order-name">Practical Math Reviewer</p>
-          <p class="order-meta">Education - Reviewers</p>
-        </div>
-        <div class="search-result">
-          <p class="order-name">Araw ng Komiks Anthology</p>
-          <p class="order-meta">Comics - Latest Release</p>
-        </div>
-        <div class="search-result">
-          <p class="order-name">Young Adult Starter Library</p>
-          <p class="order-meta">Bundle - Trending</p>
+          <p class="order-name">Loading books...</p>
+          <p class="order-meta">Please wait a moment.</p>
         </div>
       </section>
       <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">Access National Book Store Website</a>
     </main>
   </div>
+  <script src="auth.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
