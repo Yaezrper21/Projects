@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NBS Digital Shelf - Admin Dashboard</title>
+  <title>Digital Shelf - Admin Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -12,7 +12,9 @@
 <body data-page="admin">
   <div class="site-shell">
     <header class="topbar">
-      <a class="brand" href="index.html">NBS Digital Shelf</a>
+      <a class="brand" href="index.html" aria-label="Digital Shelf home">
+        <img class="brand-logo" src="assets/logo.png" alt="Digital Shelf logo">
+      </a>
       <nav class="main-nav">
         <a class="nav-link" href="index.html">Home</a>
         <a class="nav-link" href="library.html">Library</a>
@@ -31,33 +33,95 @@
       <section class="panel dashboard-shell">
         <div class="dashboard-heading">
           <div>
-            <p class="panel-title">Admin Dash</p>
-            <h1>Book management, announcements, and profile tools.</h1>
+            <p class="panel-title">Admin Dashboard</p>
+            <h1>Manage books, announcements, accounts, and the live shelf.</h1>
           </div>
           <button class="ghost-button compact-ghost" type="button" data-action="logout">Logout</button>
         </div>
 
+        <section class="stats-grid">
+          <article class="stat-card" data-super-admin-only hidden><span>Users</span><strong data-stat="users">0</strong></article>
+          <article class="stat-card" data-super-admin-only hidden><span>Admin Accounts</span><strong data-stat="admins">0</strong></article>
+          <article class="stat-card" data-super-admin-only hidden><span>Super Admins</span><strong data-stat="super-admins">0</strong></article>
+          <article class="stat-card"><span>Orders</span><strong data-stat="orders">0</strong></article>
+          <article class="stat-card"><span>Books</span><strong data-stat="books">0</strong></article>
+          <article class="stat-card"><span>Announcements</span><strong data-stat="announcements">0</strong></article>
+          <article class="stat-card"><span>Website Views</span><strong data-stat="views">0</strong></article>
+        </section>
+
         <div class="dashboard-grid">
           <section class="dashboard-card">
-            <p class="panel-title" data-book-editor-title>Create Book</p>
-            <form class="dashboard-form" data-admin-form="book">
-              <input type="hidden" name="id">
+            <p class="panel-title">Create Book</p>
+            <form class="dashboard-form wide-form" data-admin-form="book">
               <input class="text-input" type="text" name="title" placeholder="Book title">
               <input class="text-input" type="text" name="genre" placeholder="Genre">
               <textarea class="text-input text-area-input" name="description" placeholder="Description"></textarea>
-              <input class="text-input file-input" type="file" name="image" accept="image/*">
-              <button class="primary-button" type="submit">Save Book</button>
+              <div class="image-picker">
+                <div class="image-picker-preview" data-image-preview>
+                  <div class="image-picker-fallback">BK</div>
+                </div>
+                <label class="image-picker-label">
+                  <span data-image-label>Select cover picture</span>
+                  <input class="image-picker-input" type="file" name="image" accept="image/*" data-image-input>
+                </label>
+              </div>
+              <button class="primary-button" type="submit">Create Book</button>
             </form>
             <div class="management-list" data-admin-books></div>
           </section>
 
           <section class="dashboard-card">
             <p class="panel-title">Announcements</p>
-            <form class="dashboard-form" data-admin-form="announcement">
+            <form class="dashboard-form wide-form" data-admin-form="announcement">
               <input class="text-input" type="text" name="title" placeholder="Announcement text">
               <button class="primary-button" type="submit">Create Announcement</button>
             </form>
             <div class="management-list" data-admin-announcements></div>
+          </section>
+        </div>
+
+        <div class="dashboard-grid" data-super-admin-only hidden>
+          <section class="dashboard-card">
+            <p class="panel-title">Create Or Edit Accounts</p>
+            <form class="dashboard-form wide-form" data-account-form>
+              <input type="hidden" name="id">
+              <input class="text-input" type="text" name="username" placeholder="Username">
+              <input class="text-input" type="email" name="email" placeholder="Email">
+              <input class="text-input" type="password" name="password" placeholder="Password (leave blank to keep existing)">
+              <select class="text-input" name="role">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+                <option value="super_admin">Super Admin</option>
+              </select>
+              <select class="text-input" name="authType">
+                <option value="password">Password</option>
+                <option value="google">Google</option>
+                <option value="facebook">Facebook</option>
+              </select>
+              <input class="text-input" type="text" name="contactNumber" placeholder="Contact Number">
+              <input class="text-input" type="text" name="address" placeholder="Address">
+              <button class="primary-button" type="submit">Save Account</button>
+            </form>
+            <p class="feedback-strip align-left" data-super-feedback></p>
+          </section>
+
+          <section class="dashboard-card table-card">
+            <p class="panel-title">Account Management</p>
+            <div class="table-wrap">
+              <table class="account-table">
+                <thead>
+                  <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Auth</th>
+                    <th>Contact</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody data-account-table></tbody>
+              </table>
+            </div>
           </section>
         </div>
 
@@ -66,7 +130,7 @@
           <div data-admin-profile></div>
         </section>
 
-        <p class="feedback-strip" data-admin-feedback></p>
+        <p class="feedback-strip align-left" data-admin-feedback></p>
       </section>
 
       <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">Access National Book Store Website</a>
