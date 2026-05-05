@@ -478,7 +478,87 @@ async function requireSuperAdminProfile() {
 }
 
 export async function getAdminDashboardData() {
-  const profile = await requireAdminProfile();
+  // 1. Get current auth user
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error("You must be logged in to access the admin dashboard.");
+  }
+
+  // 2. Load profile
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
+    console.error(profileError);
+    throw new Error("Unable to load your profile.");
+  }
+
+  // 3. Role guard: allow BOTH admin and super_admin
+  if (!isAdminRole(profile.role)) {
+    throw new Error("Only admin or super admin can manage books.");
+  }
+
+  // 4. Load stats (users, admins, super_admins, orders, books, announcements, views)
+  const [
+    { data: usersData, error: usersError },
+    { data: ordersData, error: ordersError },
+    { data: booksData, error: booksError },
+    { data: announcementsData, error: announcementsError },
+    { data: viewsData, error: viewsError },
+    { data: accountsData, error: accountsError },
+  ] = await Promise.all([
+    supabase.from("profiles").select("id, role"),
+    supabase.from("orders").select("id"),
+    supabase.from("books").select("id, title, genre, chapters"),
+    supabase.from("announcements").select("id, title"),
+    supabase.from("site_views").select("id"),
+    supabase.from("profiles").select("id, username, email, role, auth_type, contact_number, address"),
+  ]);
+
+  if (usersError) console.error("Error loading users", usersError);
+  if (ordersError) console.error("Error loading orders", ordersError);
+  if (booksError) console.error("Error loading books", booksError);
+  if (announcementsError) console.error("Error loading announcements", announcementsError);
+  if (viewsError) console.error("Error loading views", viewsError);
+  if (accountsError) console.error("Error loading accounts", accountsError);
+
+  const users = usersData ?? [];
+  const books = booksData ?? [];
+  const announcements = announcementsData ?? [];
+  const allAccounts = accountsData ?? [];
+
+  const stats = {
+    users: users.length,
+    admins: users.filter((u) => u.role === "admin").length,
+    superAdmins: users.filter((u) => u.role === "super_admin").length,
+    orders: (ordersData ?? []).length,
+    books: books.length,
+    announcements: announcements.length,
+    views: (viewsData ?? []).length,
+  };
+
+  return {
+    currentUser: {
+      id: profile.id,
+      username: profile.username ?? "",
+      email: profile.email ?? "",
+      role: profile.role ?? "user",
+      authType: profile.auth_type ?? "password",
+      contactNumber: profile.contact_number ?? "",
+      address: profile.address ?? "",
+    },
+    stats,
+    books,
+    announcements,
+    accounts: allAccounts,
+  };
 
   const booksPromise = fetchBookData();
   const announcementsPromise = getAnnouncements();
