@@ -641,11 +641,18 @@ export async function saveBook({ id = "", title, genre, description, imageFile =
 
   if (imageFile) {
     const coverPath = buildStoragePath(bookRow.id, `cover-${Date.now()}.${fileExtension(imageFile.name)}`);
-    const { error: uploadError } = await supabase.storage
+    console.log("Uploading cover to:", coverPath, "File:", imageFile);
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.bookCovers)
       .upload(coverPath, imageFile, { upsert: true });
 
-    throwIfError(uploadError, "Unable to upload the cover picture.");
+    if (uploadError) {
+      console.error("Upload error:", uploadError);
+      throwIfError(uploadError, "Unable to upload the cover picture.");
+    }
+    
+    console.log("Upload successful:", uploadData);
 
     const { data, error } = await supabase
       .from("books")
