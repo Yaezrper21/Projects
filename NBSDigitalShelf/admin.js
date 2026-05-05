@@ -58,7 +58,7 @@ async function initAdminPage() {
       card.hidden = !isSuperAdmin;
     });
 
-    // Books list
+        // Books list
     if (booksContainer) {
       if (!books.length) {
         booksContainer.innerHTML = `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
@@ -79,7 +79,7 @@ async function initAdminPage() {
       }
     }
 
-        // Handle Edit Book clicks: go to edit-book.html?id=<bookId>
+    // Handle Edit Book clicks: go to edit-book.html?id=<bookId>
     if (booksContainer) {
       booksContainer.addEventListener("click", (event) => {
         const target = event.target;
@@ -89,117 +89,6 @@ async function initAdminPage() {
         if (!bookId) return;
 
         window.location.href = `edit-book.html?id=${bookId}`;
-      });
-    }
-
-    // Announcements list
-    if (announcementsContainer) {
-      if (!announcements.length) {
-        announcementsContainer.innerHTML = `<div class="empty-shelf">No announcements yet.</div>`;
-      } else {
-        announcementsContainer.innerHTML = announcements
-          .map(
-            (item) => `
-          <article class="management-row">
-            <div>
-              <p class="management-title">${escapeHtml(item.title)}</p>
-            </div>
-            <button class="ghost-button compact-ghost" type="button" data-admin-delete-announcement="${item.id}">Delete</button>
-          </article>
-        `
-          )
-          .join("");
-      }
-    }
-
-    // Profile summary
-    if (profileContainer && currentUser) {
-      profileContainer.innerHTML = `
-        <p>Username: <strong>${escapeHtml(currentUser.username)}</strong></p>
-        <p>Email: <strong>${escapeHtml(currentUser.email)}</strong></p>
-        <p>Role: <strong>${escapeHtml(currentUser.role)}</strong></p>
-      `;
-    }
-
-    // Book form
-    if (bookForm) {
-      const imageInput = bookForm.querySelector('[data-image-input]');
-      const imagePreview = bookForm.querySelector('[data-image-preview]');
-      const imageLabel = bookForm.querySelector('[data-image-label]');
-
-      if (imageInput && imagePreview && imageLabel) {
-        imageInput.addEventListener("change", () => {
-          const file = imageInput.files?.[0] || null;
-          if (!file) {
-            imagePreview.innerHTML = `<div class="image-picker-fallback">BK</div>`;
-            imageLabel.textContent = "Select cover picture";
-            return;
-          }
-
-          const reader = new FileReader();
-          reader.onload = () => {
-            imagePreview.innerHTML = `<img class="book-cover-image" src="${reader.result}" alt="Cover preview">`;
-          };
-          reader.readAsDataURL(file);
-          imageLabel.textContent = file.name;
-        });
-      }
-
-      bookForm.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const formData = new FormData(bookForm);
-
-        const payload = {
-          id: "", // create new book; for editing you can fill this later
-          title: formData.get("title")?.toString().trim() || "",
-          genre: formData.get("genre")?.toString().trim() || "",
-          description: formData.get("description")?.toString().trim() || "",
-          imageFile: formData.get("image") instanceof File ? formData.get("image") : null
-        };
-
-        if (!payload.title || !payload.genre || !payload.description) {
-          setFeedback("Book title, genre, and description are required.", "error");
-          return;
-        }
-
-        try {
-          setFeedback("Saving book...", "info");
-          await saveBook(payload);
-          setFeedback("Book saved successfully.", "success");
-          bookForm.reset();
-          if (imagePreview) {
-            imagePreview.innerHTML = `<div class="image-picker-fallback">BK</div>`;
-          }
-          if (imageLabel) {
-            imageLabel.textContent = "Select cover picture";
-          }
-
-          // Reload dashboard data to refresh counts and list
-          const refreshed = await getAdminDashboardData();
-          const refreshedBooks = refreshed.books || [];
-          if (booksContainer) {
-            if (!refreshedBooks.length) {
-              booksContainer.innerHTML = `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
-            } else {
-              booksContainer.innerHTML = refreshedBooks
-                .map(
-                  (book) => `
-                <article class="management-row">
-                  <div>
-                    <p class="management-title">${escapeHtml(book.title)}</p>
-                    <p class="management-meta">${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters</p>
-                  </div>
-                  <button class="ghost-button compact-ghost" type="button" data-admin-edit-book="${book.id}">Edit</button>
-                </article>
-              `
-                )
-                .join("");
-            }
-          }
-        } catch (error) {
-          console.error(error);
-          setFeedback(error.message || "Unable to save the book.", "error");
-        }
       });
     }
 
