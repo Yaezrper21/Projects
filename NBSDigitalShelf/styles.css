@@ -10,6 +10,10 @@
   --red-soft: #f5f5f5;
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
 }
+/* Highlight the current navigation item */
+.nav-link.nav-active {
+  font-weight: 700; /* or bold */
+}
 
 :root[data-theme="dark"] {
   --bg: #0f0f10;
