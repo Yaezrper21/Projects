@@ -563,43 +563,6 @@ export async function getAdminDashboardData() {
   };
 }
 
-  const booksPromise = fetchBookData();
-  const announcementsPromise = getAnnouncements();
-  const pageViewsPromise = supabase.from("page_views").select("id", { count: "exact", head: true });
-  const ordersPromise = supabase.from("orders").select("id", { count: "exact", head: true });
-  const profilesPromise = supabase.from("profiles").select("*").order("created_at", { ascending: true });
-
-  const [books, announcements, pageViewsRes, ordersRes, profilesRes] = await Promise.all([
-    booksPromise,
-    announcementsPromise,
-    pageViewsPromise,
-    ordersPromise,
-    profilesPromise
-  ]);
-
-  throwIfError(pageViewsRes.error, "Unable to load website view stats.");
-  throwIfError(ordersRes.error, "Unable to load order stats.");
-  throwIfError(profilesRes.error, "Unable to load member profiles.");
-
-  const profiles = (profilesRes.data || []).map((item) => normalizeProfile(item, { user: { app_metadata: { provider: "password" }, email: item.email } }));
-
-  return {
-    currentUser: profile,
-    stats: {
-      users: profiles.filter((item) => item.role === "user").length,
-      admins: profiles.filter((item) => item.role === "admin").length,
-      superAdmins: profiles.filter((item) => item.role === "super_admin").length,
-      orders: ordersRes.count || 0,
-      books: books.length,
-      announcements: announcements.length,
-      views: pageViewsRes.count || 0
-    },
-    books,
-    announcements,
-    accounts: profile.role === "super_admin" ? profiles : []
-  };
-}
-
 export async function saveAnnouncement(title) {
   const profile = await requireAdminProfile();
   if (!title) throw new Error("Announcement text is required.");
