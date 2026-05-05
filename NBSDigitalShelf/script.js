@@ -323,14 +323,26 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
   const buyChaptersButton = content.querySelector("[data-book-buy-chapters]");
     const buyBookButton = content.querySelector("[data-book-buy-book]");
 
-  // Buy Book: go to physical purchase page
-  if (buyBookButton) {
-    buyBookButton.addEventListener("click", () => {
-      const url = `buy-book.html?book=${encodeURIComponent(book.id)}`;
-      window.location.href = url;
-    });
-  }
+if (!chapterList) return;
+if (flashMessage) {
+  setModalFeedback(feedback, flashMessage, flashState);
+}
 
+// Buy Chapters: just guide user to chapter list
+if (buyChaptersButton) {
+  buyChaptersButton.addEventListener("click", () => {
+    chapterList.scrollIntoView({ behavior: "smooth", block: "start" });
+    setModalFeedback(feedback, "Scroll down and choose which chapter to buy.", "info");
+  });
+}
+
+// Buy Book: go to physical purchase page
+if (buyBookButton) {
+  buyBookButton.addEventListener("click", () => {
+    const url = `buy-book.html?book=${encodeURIComponent(book.id)}`;
+    window.location.href = url;
+  });
+}
   if (!(book.chapters || []).length) {
     chapterList.innerHTML = `<div class="empty-shelf">No chapters published yet for this book.</div>`;
   } else {
