@@ -10,12 +10,24 @@
   <div class="site-shell">
     <header class="topbar">
       <a class="brand" href="index.html">NBS Digital Shelf</a>
-      <!-- your nav links here -->
+      <nav class="main-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="library.html">Library</a>
+        <a class="nav-link" href="topup.html">Top-Up</a>
+        <a class="nav-link" href="order.html">Order</a>
+        <a class="nav-link" href="search.html">Search</a>
+        <a class="nav-link" href="profile.html">Profile</a>
+        <a class="nav-link active" href="admin.html">Admin Dashboard</a>
+        <a class="nav-link" href="super-admin.html">Super Admin</a>
+        <a class="nav-link" href="login.html">Login</a>
+        <a class="nav-link" href="signup.html">Sign Up</a>
+      </nav>
     </header>
 
     <main>
       <section class="panel">
         <p class="panel-title">Admin Dashboard</p>
+
         <div class="dashboard-grid">
           <section class="dashboard-card">
             <p class="panel-title">Create Book</p>
@@ -23,6 +35,7 @@
               <input class="text-input" type="text" name="title" placeholder="Book title">
               <input class="text-input" type="text" name="genre" placeholder="Genre">
               <textarea class="text-input text-area-input" name="description" placeholder="Description"></textarea>
+
               <div class="image-picker">
                 <div class="image-picker-preview" data-image-preview>
                   <div class="image-picker-fallback">BK</div>
@@ -32,6 +45,7 @@
                   <input class="image-picker-input" type="file" name="image" accept="image/*" data-image-input>
                 </label>
               </div>
+
               <button class="primary-button" type="submit">Create Book</button>
             </form>
             <div class="management-list" data-admin-books></div>
