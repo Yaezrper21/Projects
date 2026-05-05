@@ -288,38 +288,6 @@ export async function getBookById(bookId) {
   return await enrichBookChaptersWithText(bookWithAccess);
 }
 
-      if (!profile) {
-        return {
-          ...chapter,
-          canRead: false,
-          purchased: false,
-          requiresPurchase: true,
-          isGuest: true
-        };
-      }
-
-      if (isAdminRole(profile.role)) {
-        return {
-          ...chapter,
-          canRead: true,
-          purchased: true,
-          requiresPurchase: false,
-          isGuest: false
-        };
-      }
-
-      const purchased = purchasedChapterIds.has(chapter.id);
-      return {
-        ...chapter,
-        canRead: purchased,
-        purchased,
-        requiresPurchase: !purchased,
-        isGuest: false
-      };
-    })
-  };
-}
-
 export async function getChapterAccess(bookId, chapterId) {
   const profile = await getCurrentProfile();
   const book = await getBookById(bookId);
