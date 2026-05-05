@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBS Digital Shelf - Buy Chapters</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="buy-chapters">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">NBS Digital Shelf</a>
+      <nav class="main-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="library.html">Library</a>
+        <a class="nav-link" href="topup.html">Top-Up</a>
+        <a class="nav-link" href="order.html">Order</a>
+        <a class="nav-link" href="buy-chapters.html">Buy Chapters</a>
+        <a class="nav-link" href="search.html">Search</a>
+        <a class="nav-link" href="profile.html">Profile</a>
+        <a class="nav-link" href="login.html">Login</a>
+        <a class="nav-link" href="signup.html">Sign Up</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="session-banner panel" data-session-banner></section>
+      
+      <section class="panel">
+        <div class="purchase-box">
+          <p class="panel-title" data-book-title></p>
+          <p class="feedback-strip" data-feedback></p>
+          <div class="chapter-purchase-list" data-chapter-list></div>
+          <button class="primary-button full" data-purchase-selected hidden>Purchase Selected Chapters</button>
+          <button class="ghost-button full" data-back-to-modal>← Back to Book</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="supabase-client.js"></script>
+  <script type="module" src="supabase-data.js"></script>
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const bookId = params.get('book');
+      const feedbackEl = document.querySelector('[data-feedback]');
+      const bookTitleEl = document.querySelector('[data-book-title]');
+      const chapterListEl = document.querySelector('[data-chapter-list]');
+      const purchaseBtn = document.querySelector('[data-purchase-selected]');
+      const backBtn = document.querySelector('[data-back-to-modal]');
+
+      async function init() {
+        if (!bookId) {
+          setFeedback('No book selected.', 'error');
+          return;
+        }
+        const book = await window.nbsShelfData?.getBookById(bookId);
+        if (!book) {
+          setFeedback('Book not found.', 'error');
+          return;
+        }
+        bookTitleEl.textContent = book.title;
+        
+        renderChapters(book);
+        purchaseBtn.hidden = false;
+      }
+
+      function renderChapters(book) {
+        chapterListEl.innerHTML = '';
+        let hasBuyable = false;
+        book.chapters.forEach(chapter => {
+          const status = chapter.purchased ? 'Bought' : chapter.canRead ? 'Free' : 'Buyable';
+          const buyable = !chapter.canRead && !chapter.purchased && chapter.requiresPurchase;
+          if (buyable) hasBuyable = true;
+
+          const card = document.createElement('div');
+          card.className = 'chapter-card';
+          card.innerHTML = `
+            <div class="chapter-card-top">
+              <div>
+                <p class="chapter-title">${chapter.title}</p>
+                <p class="chapter-meta">${status} Chapter</p>
+              </div>
+              <label class="checkbox-row">
+                <input type="checkbox" value="${chapter.id}" ${buyable ? '' : 'disabled'} data-chapter-id>
+                <span>Select to Buy</span>
+              </label>
+            </div>
+          `;
+          chapterListEl.appendChild(card);
+        });
+        if (!hasBuyable) {
+          chapterListEl.innerHTML = '<p class="muted-copy center">No chapters available to purchase.</p>';
+          purchaseBtn.hidden = true;
+        }
+      }
+
+      purchaseBtn?.addEventListener('click', async () => {
+        const checkboxes = chapterListEl.querySelectorAll('input[data-chapter-id]:checked');
+        const chapterIds = Array.from(checkboxes).map(cb => cb.value);
+        if (!chapterIds.length) {
+          setFeedback('Select chapters to buy.', 'error');
+          return;
+        }
+        purchaseBtn.disabled = true;
+        const result = await window.nbsShelfData?.purchaseMultipleChapters(bookId, chapterIds);
+        setFeedback(result?.message || 'Purchase failed.', result?.ok ? 'success' : 'error');
+        if (result?.ok) {
+          // Refresh
+          const book = await window.nbsShelfData?.getBookById(bookId);
+          renderChapters(book);
+        }
+        purchaseBtn.disabled = false;
+      });
+
+      backBtn?.addEventListener('click', () => {
+        window.history.back();
+      });
+
+      function setFeedback(msg, state) {
+        feedbackEl.textContent = msg;
+        feedbackEl.dataset.state = state;
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
+
