@@ -58,7 +58,7 @@ async function initAdminPage() {
       card.hidden = !isSuperAdmin;
     });
 
-           // Books list
+               // Books list
     if (booksContainer) {
       if (!books.length) {
         booksContainer.innerHTML = `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
@@ -72,10 +72,18 @@ async function initAdminPage() {
               <p class="management-meta">${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters</p>
             </div>
             <div class="management-actions">
-              <button class="ghost-button compact-ghost" type="button" data-admin-edit-book="${book.id}">
+              <button
+                class="ghost-button compact-ghost"
+                type="button"
+                data-admin-edit-book="${book.id}"
+              >
                 Edit
               </button>
-              <button class="ghost-button compact-ghost" type="button" data-admin-delete-book="${book.id}">
+              <button
+                class="ghost-button compact-ghost"
+                type="button"
+                data-admin-delete-book="${book.id}"
+              >
                 Delete
               </button>
             </div>
@@ -85,7 +93,7 @@ async function initAdminPage() {
           .join("");
       }
 
-      // Handle Edit/Delete clicks on books
+      // Handle Edit / Delete clicks on books
       booksContainer.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
@@ -99,7 +107,7 @@ async function initAdminPage() {
           return;
         }
 
-        // Delete: call deleteBook and refresh list
+        // Delete: delete the book and refresh
         if (deleteId) {
           if (!confirm("Are you sure you want to delete this book?")) return;
 
@@ -122,10 +130,18 @@ async function initAdminPage() {
                     <p class="management-meta">${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters</p>
                   </div>
                   <div class="management-actions">
-                    <button class="ghost-button compact-ghost" type="button" data-admin-edit-book="${book.id}">
+                    <button
+                      class="ghost-button compact-ghost"
+                      type="button"
+                      data-admin-edit-book="${book.id}"
+                    >
                       Edit
                     </button>
-                    <button class="ghost-button compact-ghost" type="button" data-admin-delete-book="${book.id}">
+                    <button
+                      class="ghost-button compact-ghost"
+                      type="button"
+                      data-admin-delete-book="${book.id}"
+                    >
                       Delete
                     </button>
                   </div>
