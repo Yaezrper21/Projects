@@ -289,14 +289,13 @@ async function initAdminPage() {
     setFeedback("Admin dashboard loaded.", "success");
   } catch (error) {
     console.error(error);
-    // If requireAdminProfile throws, show message and optionally redirect
     const message = error.message || "Admin access is required.";
     if (feedback) {
       feedback.textContent = message;
       feedback.dataset.state = "error";
     }
-    // Optional hard redirect:
-    // window.location.href = "login.html";
+    // Hard redirect: kick non-admins / logged-out users to login
+    window.location.href = "login.html";
   }
 }
 
