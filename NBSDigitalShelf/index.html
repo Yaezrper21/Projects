@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBS Digital Shelf - Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="home">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">NBS Digital Shelf</a>
+      <nav class="main-nav">
+        <a class="nav-link active" href="index.html">Home</a>
+        <a class="nav-link" href="library.html">Library</a>
+        <a class="nav-link" href="topup.html">Top-Up</a>
+        <a class="nav-link" href="order.html">Order</a>
+        <a class="nav-link" href="search.html">Search</a>
+        <a class="nav-link" href="profile.html">Profile</a>
+        <a class="nav-link" href="login.html">Login</a>
+        <a class="nav-link" href="signup.html">Sign Up</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="session-banner panel" data-session-banner></section>
+      <section class="panel hero-grid">
+        <div class="panel inset">
+          <p class="panel-title">Announcements</p>
+          <div class="stack-list" data-announcement-list>
+            <div class="list-line">Loading announcements...</div>
+          </div>
+        </div>
+        <div class="panel feature-panel">
+          <div class="feature-copy">
+            <p class="eyebrow">Digital reading, simplified</p>
+            <h1>Browse National Book Store picks in a clean, focused shelf.</h1>
+            <p class="feature-text">A minimal storefront for ebooks, comics, and learning titles, shaped directly from your wireframes.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel shelf-section">
+        <p class="panel-title">Most Popular</p>
+        <div class="book-row" id="home-popular"></div>
+        <div class="view-more-row"><a class="view-more-link" href="library.html#popular">View More</a></div>
+      </section>
+
+      <section class="panel shelf-section">
+        <p class="panel-title">Trending</p>
+        <div class="book-row" id="home-trending"></div>
+        <div class="view-more-row"><a class="view-more-link" href="library.html#trending">View More</a></div>
+      </section>
+
+      <section class="panel shelf-section">
+        <p class="panel-title">Latest Release</p>
+        <div class="book-grid" id="home-latest"></div>
+        <div class="view-more-row"><a class="view-more-link" href="library.html#latest">View More</a></div>
+      </section>
+
+      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">Access National Book Store Website</a>
+    </main>
+  </div>
+
+<script type="module" src="supabase-client.js"></script>
+<script type="module" src="supabase-data.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
