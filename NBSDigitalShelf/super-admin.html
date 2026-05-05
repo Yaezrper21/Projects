@@ -6,7 +6,9 @@
   <title>NBS Digital Shelf - Super Admin Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="super-admin">
@@ -18,6 +20,8 @@
         <a class="nav-link" href="library.html">Library</a>
         <a class="nav-link" href="search.html">Search</a>
         <a class="nav-link" href="profile.html">Profile</a>
+        <a class="nav-link" href="admin.html">Admin Dashboard</a>
+        <a class="nav-link active" href="super-admin.html">Super Admin</a>
         <a class="nav-link" href="login.html">Login</a>
         <a class="nav-link" href="signup.html">Sign Up</a>
       </nav>
@@ -32,7 +36,7 @@
             <p class="panel-title">Super Admin Dash</p>
             <h1>Statistics and account management for the whole shelf.</h1>
           </div>
-          <button class="ghost-button compact-ghost" type="button" data-action="logout">Logout</button>
+          <button class="ghost-button compact-ghost" type="button" data-logout>Logout</button>
         </div>
 
         <section class="stats-grid">
@@ -128,10 +132,13 @@
         <p class="feedback-strip" data-admin-feedback></p>
       </section>
 
-      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">Access National Book Store Website</a>
+      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">
+        Access National Book Store Website
+      </a>
     </main>
   </div>
 
   <script type="module" src="auth.js"></script>
+  <script type="module" src="super-admin.js"></script>
 </body>
 </html>
