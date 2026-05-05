@@ -7,7 +7,7 @@ async function initAuthUi() {
   const profileLink = document.querySelector('a[href="profile.html"]');
   const adminLink = document.querySelector('a[href="admin.html"]');
   const superAdminLink = document.querySelector('a[href="super-admin.html"]');
-  const logoutButton = document.querySelector("[data-logout]"); // profile/logout buttons
+  const logoutButton = document.querySelector("[data-logout]");
 
   try {
     const profile = await getCurrentProfile();
@@ -31,12 +31,15 @@ async function initAuthUi() {
 
     // Role-based
     if (profile.role === "super_admin") {
+      // Super admin: only see Super Admin dashboard
       if (superAdminLink) superAdminLink.style.display = "";
-      if (adminLink) adminLink.style.display = "";
+      if (adminLink) adminLink.style.display = "none";
     } else if (profile.role === "admin") {
+      // Admin: only see Admin dashboard
       if (adminLink) adminLink.style.display = "";
       if (superAdminLink) superAdminLink.style.display = "none";
     } else {
+      // Normal users: no admin links
       if (adminLink) adminLink.style.display = "none";
       if (superAdminLink) superAdminLink.style.display = "none";
     }
