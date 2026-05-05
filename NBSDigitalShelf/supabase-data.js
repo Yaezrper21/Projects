@@ -545,44 +545,43 @@ export async function getAdminDashboardData() {
     throw new Error("Only admin or super admin can manage books.");
   }
 
-  // 4. Load stats (users, orders, books, announcements, page views, accounts)
+  // 4. Load stats and enriched books
   const [
     { data: usersData, error: usersError },
     { data: ordersData, error: ordersError },
-    { data: booksData, error: booksError },
     { data: announcementsData, error: announcementsError },
     { data: pageViewsData, error: pageViewsError },
     { data: accountsData, error: accountsError },
+    books, // enriched books with chapters from getBooks()
   ] = await Promise.all([
     supabase.from("profiles").select("id, role"),
     supabase.from("orders").select("id"),
-    supabase.from("books").select("id, title, genre"),
     supabase.from("announcements").select("id, title"),
     supabase.from("page_views").select("id"),
     supabase.from("profiles").select(
       "id, username, email, role, contact_number, address"
     ),
+    getBooks(), // <-- IMPORTANT: use mapped books (includes chapters[])
   ]);
 
   if (usersError) console.error("Error loading users", usersError);
   if (ordersError) console.error("Error loading orders", ordersError);
-  if (booksError) console.error("Error loading books", booksError);
   if (announcementsError) console.error("Error loading announcements", announcementsError);
   if (pageViewsError) console.error("Error loading page views", pageViewsError);
   if (accountsError) console.error("Error loading accounts", accountsError);
 
   const users = usersData ?? [];
-  const books = booksData ?? [];
   const announcements = announcementsData ?? [];
   const allAccounts = accountsData ?? [];
   const pageViews = pageViewsData ?? [];
+  const safeBooks = books ?? [];
 
   const stats = {
     users: users.length,
     admins: users.filter((u) => u.role === "admin").length,
     superAdmins: users.filter((u) => u.role === "super_admin").length,
     orders: (ordersData ?? []).length,
-    books: books.length,
+    books: safeBooks.length,
     announcements: announcements.length,
     views: pageViews.length,
   };
@@ -593,12 +592,12 @@ export async function getAdminDashboardData() {
       username: profile.username ?? "",
       email: profile.email ?? "",
       role: profile.role ?? "user",
-      authType: "password", // you can store this in profiles later if you want
+      authType: "password",
       contactNumber: profile.contact_number ?? "",
       address: profile.address ?? "",
     },
     stats,
-    books,
+    books: safeBooks,
     announcements,
     accounts: allAccounts,
   };
