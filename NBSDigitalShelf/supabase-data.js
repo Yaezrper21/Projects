@@ -221,14 +221,46 @@ async function getPurchasedChapterIds(bookId, profile) {
   return new Set((data || []).map((item) => item.chapter_id));
 }
 
+async function enrichBookChaptersWithText(book) {
+  if (!book || !Array.isArray(book.chapters) || !book.chapters.length) {
+    return book;
+  }
+
+  const chaptersWithText = [];
+  for (const ch of book.chapters) {
+    if (!ch.filePath) {
+      chaptersWithText.push({ ...ch, text: "" });
+      continue;
+    }
+
+    const { data, error } = await supabase.storage
+      .from(STORAGE_BUCKETS.chapterFiles)
+      .download(ch.filePath);
+
+    if (error || !data) {
+      console.error("Failed to download chapter file", ch.filePath, error);
+      chaptersWithText.push({ ...ch, text: "" });
+      continue;
+    }
+
+    const text = await data.text();
+    chaptersWithText.push({ ...ch, text });
+  }
+
+  return { ...book, chapters: chaptersWithText };
+}
+
 export async function getBookById(bookId) {
-  const [profile, books] = await Promise.all([getCurrentProfile(), fetchBookData([bookId])]);
+  const [profile, books] = await Promise.all([
+    getCurrentProfile(),
+    fetchBookData([bookId]),
+  ]);
   const book = books.find((item) => item.id === bookId) || null;
   if (!book) return null;
 
   const purchasedChapterIds = await getPurchasedChapterIds(bookId, profile);
 
-  return {
+  const bookWithAccess = {
     ...book,
     chapters: book.chapters.map((chapter) => {
       if (!chapter.isPaid) {
@@ -237,9 +269,24 @@ export async function getBookById(bookId) {
           canRead: true,
           purchased: false,
           requiresPurchase: false,
-          isGuest: !profile
+          isGuest: !profile,
         };
       }
+
+      const purchased = purchasedChapterIds.has(chapter.id);
+
+      return {
+        ...chapter,
+        canRead: purchased || isAdminRole(profile?.role),
+        purchased,
+        requiresPurchase: !purchased,
+        isGuest: !profile,
+      };
+    }),
+  };
+
+  return await enrichBookChaptersWithText(bookWithAccess);
+}
 
       if (!profile) {
         return {
