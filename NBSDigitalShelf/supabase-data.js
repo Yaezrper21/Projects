@@ -488,10 +488,10 @@ export async function getAdminDashboardData() {
     throw new Error("You must be logged in to access the admin dashboard.");
   }
 
-  // 2. Load profile
+  // 2. Load profile (only columns that actually exist)
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("*")
+    .select("id, username, email, role, contact_number, address")
     .eq("id", user.id)
     .single();
 
@@ -505,22 +505,22 @@ export async function getAdminDashboardData() {
     throw new Error("Only admin or super admin can manage books.");
   }
 
-  // 4. Load stats (users, admins, super_admins, orders, books, announcements, views)
+  // 4. Load stats (users, orders, books, announcements, page views, accounts)
   const [
     { data: usersData, error: usersError },
     { data: ordersData, error: ordersError },
     { data: booksData, error: booksError },
     { data: announcementsData, error: announcementsError },
-    { data: viewsData, error: viewsError },
+    { data: pageViewsData, error: pageViewsError },
     { data: accountsData, error: accountsError },
   ] = await Promise.all([
     supabase.from("profiles").select("id, role"),
     supabase.from("orders").select("id"),
-    supabase.from("books").select("id, title, genre, chapters"),
+    supabase.from("books").select("id, title, genre"),
     supabase.from("announcements").select("id, title"),
-    supabase.from("site_views").select("id"),
+    supabase.from("page_views").select("id"),
     supabase.from("profiles").select(
-      "id, username, email, role, auth_type, contact_number, address"
+      "id, username, email, role, contact_number, address"
     ),
   ]);
 
@@ -528,13 +528,14 @@ export async function getAdminDashboardData() {
   if (ordersError) console.error("Error loading orders", ordersError);
   if (booksError) console.error("Error loading books", booksError);
   if (announcementsError) console.error("Error loading announcements", announcementsError);
-  if (viewsError) console.error("Error loading views", viewsError);
+  if (pageViewsError) console.error("Error loading page views", pageViewsError);
   if (accountsError) console.error("Error loading accounts", accountsError);
 
   const users = usersData ?? [];
   const books = booksData ?? [];
   const announcements = announcementsData ?? [];
   const allAccounts = accountsData ?? [];
+  const pageViews = pageViewsData ?? [];
 
   const stats = {
     users: users.length,
@@ -543,7 +544,7 @@ export async function getAdminDashboardData() {
     orders: (ordersData ?? []).length,
     books: books.length,
     announcements: announcements.length,
-    views: (viewsData ?? []).length,
+    views: pageViews.length,
   };
 
   return {
@@ -552,7 +553,7 @@ export async function getAdminDashboardData() {
       username: profile.username ?? "",
       email: profile.email ?? "",
       role: profile.role ?? "user",
-      authType: profile.auth_type ?? "password",
+      authType: "password", // you can store this in profiles later if you want
       contactNumber: profile.contact_number ?? "",
       address: profile.address ?? "",
     },
