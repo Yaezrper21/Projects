@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Buy Book • NBS Digital Shelf</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-page="buy-book">
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="index.html" class="logo">NBS Digital Shelf</a>
+      <nav class="main-nav">
+        <a href="index.html" class="nav-link" data-page="home">Home</a>
+        <a href="library.html" class="nav-link" data-page="library">Library</a>
+        <a href="search.html" class="nav-link" data-page="search">Search</a>
+        <a href="my-books.html" class="nav-link" data-page="my-books">My Books</a>
+        <a href="profile.html" class="nav-link" data-page="profile">Profile</a>
+        <a href="admin.html" class="nav-link" data-page="admin">Admin</a>
+        <a href="super-admin.html" class="nav-link" data-page="super-admin">Super Admin</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <section class="panel">
+      <h1 class="panel-title">Buy Physical Copy</h1>
+      <p class="feature-text">
+        Complete the details below to request a physical copy of this book.
+      </p>
+
+      <div class="buy-book-layout">
+        <!-- Dummy cover box -->
+        <div class="buy-book-cover">
+          <div class="buy-book-cover-placeholder">
+            Cover preview
+          </div>
+          <p class="muted-copy" data-book-title></p>
+          <p class="muted-copy" data-book-genre></p>
+        </div>
+
+        <!-- Form -->
+        <form class="buy-book-form" id="buy-book-form">
+          <h2>Shipping details</h2>
+
+          <div class="field">
+            <label class="field-label" for="full-name">Full name</label>
+            <input id="full-name" name="fullName" class="text-input" type="text" required />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="email">Email</label>
+            <input id="email" name="email" class="text-input" type="email" required />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="phone">Contact number</label>
+            <input id="phone" name="phone" class="text-input" type="tel" required />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="address-line1">Address line 1</label>
+            <input id="address-line1" name="addressLine1" class="text-input" type="text" required />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="address-line2">Address line 2 (optional)</label>
+            <input id="address-line2" name="addressLine2" class="text-input" type="text" />
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label class="field-label" for="city">City</label>
+              <input id="city" name="city" class="text-input" type="text" required />
+            </div>
+            <div class="field">
+              <label class="field-label" for="province">Province</label>
+              <input id="province" name="province" class="text-input" type="text" required />
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label class="field-label" for="postal">Postal code</label>
+              <input id="postal" name="postal" class="text-input" type="text" required />
+            </div>
+            <div class="field">
+              <label class="field-label" for="country">Country</label>
+              <input id="country" name="country" class="text-input" type="text" value="Philippines" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">How would you like to receive the book?</label>
+            <div class="radio-row">
+              <label>
+                <input type="radio" name="deliveryOption" value="delivery" checked />
+                Deliver to my address
+              </label>
+              <label>
+                <input type="radio" name="deliveryOption" value="pickup" />
+                I’ll pick it up from the nearest store
+              </label>
+            </div>
+          </div>
+
+          <div class="field" data-pickup-note hidden>
+            <p class="muted-copy">
+              When you choose in‑store pickup, staff from your selected branch will contact you with stock and pickup details.
+            </p>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="notes">Additional notes (optional)</label>
+            <textarea id="notes" name="notes" class="text-input" rows="3"></textarea>
+          </div>
+
+          <div class="buy-book-actions">
+            <button type="submit" class="primary-button">Place request</button>
+            <a href="library.html" class="ghost-button">Back to library</a>
+          </div>
+
+          <p class="feedback-strip" id="buy-book-feedback" data-state="info"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="supabase-client.js" type="module"></script>
+  <script src="supabase-data.js" type="module"></script>
+  <script src="script.js" type="module"></script>
+  <script type="module">
+    import { getBooks } from "./supabase-data.js";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const bookId = params.get("book");
+      const titleNode = document.querySelector("[data-book-title]");
+      const genreNode = document.querySelector("[data-book-genre]");
+      const form = document.getElementById("buy-book-form");
+      const feedback = document.getElementById("buy-book-feedback");
+      const pickupNote = document.querySelector("[data-pickup-note]");
+
+      // Toggle pickup note
+      form.querySelectorAll('input[name="deliveryOption"]').forEach((input) => {
+        input.addEventListener("change", () => {
+          const pickup = input.value === "pickup" && input.checked;
+          pickupNote.hidden = !pickup;
+        });
+      });
+
+      if (bookId) {
+        try {
+          const books = await getBooks();
+          const book = books.find((b) => String(b.id) === String(bookId));
+          if (book) {
+            titleNode.textContent = book.title;
+            genreNode.textContent = book.genre;
+          } else {
+            titleNode.textContent = "Unknown book";
+          }
+        } catch {
+          titleNode.textContent = "Book details unavailable";
+        }
+      }
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        feedback.textContent = "This is a demo form. Your request has been recorded locally.";
+        feedback.dataset.state = "success";
+      });
+    });
+  </script>
+</body>
+</html>
