@@ -500,7 +500,7 @@ async function requireSuperAdminProfile() {
 
 async function requireAdminOrSuperAdminProfile() {
   const profile = await getCurrentProfile();
-  if (!profile || (profile.role !== "admin" && profile.role !== "super_admin")) {
+  if (!profile || !isAdminRole(profile.role)) {
     throw new Error("Admin or super admin access is required.");
   }
   return profile;
