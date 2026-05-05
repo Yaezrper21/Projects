@@ -460,9 +460,13 @@ export async function uploadProfileAvatar(file) {
   if (!file) throw new Error("Profile picture is required.");
 
   const path = buildStoragePath(profile.id, `avatar-${Date.now()}.${fileExtension(file.name)}`);
+  
+  // Convert file to blob if needed
+  const fileBlob = file instanceof Blob ? file : new Blob([file], { type: file.type || "image/jpeg" });
+  
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKETS.profileAvatars)
-    .upload(path, file, { upsert: true });
+    .upload(path, fileBlob, { upsert: true, cacheControl: "3600" });
 
   throwIfError(uploadError, "Unable to upload the profile picture.");
 
@@ -641,18 +645,15 @@ export async function saveBook({ id = "", title, genre, description, imageFile =
 
   if (imageFile) {
     const coverPath = buildStoragePath(bookRow.id, `cover-${Date.now()}.${fileExtension(imageFile.name)}`);
-    console.log("Uploading cover to:", coverPath, "File:", imageFile);
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    // Convert file to blob if needed - ensure proper MIME type
+    const fileBlob = imageFile instanceof Blob ? imageFile : new Blob([imageFile], { type: imageFile.type || "image/jpeg" });
+    
+    const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.bookCovers)
-      .upload(coverPath, imageFile, { upsert: true });
+      .upload(coverPath, fileBlob, { upsert: true, cacheControl: "3600" });
 
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
-      throwIfError(uploadError, "Unable to upload the cover picture.");
-    }
-    
-    console.log("Upload successful:", uploadData);
+    throwIfError(uploadError, "Unable to upload the cover picture.");
 
     const { data, error } = await supabase
       .from("books")
@@ -708,7 +709,7 @@ export async function saveChapter({ bookId, chapterId = "", title, text, accessT
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKETS.chapterFiles)
-    .upload(filePath, chapterFile, { upsert: true, contentType: "text/plain;charset=utf-8" });
+    .upload(filePath, chapterFile, { upsert: true, cacheControl: "3600", contentType: "text/plain;charset=utf-8" });
 
   throwIfError(uploadError, "Unable to upload the chapter file.");
 
