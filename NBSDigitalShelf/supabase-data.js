@@ -494,6 +494,14 @@ async function requireSuperAdminProfile() {
   return profile;
 }
 
+async function requireAdminOrSuperAdminProfile() {
+  const profile = await getCurrentProfile();
+  if (!profile || (profile.role !== "admin" && profile.role !== "super_admin")) {
+    throw new Error("Admin or super admin access is required.");
+  }
+  return profile;
+}
+
 export async function getAdminDashboardData() {
   // 1. Get current auth user
   const {
@@ -582,7 +590,7 @@ export async function getAdminDashboardData() {
 }
 
 export async function saveAnnouncement(title) {
-  const profile = await requireAdminProfile();
+  const profile = await requireAdminOrSuperAdminProfile();
   if (!title) throw new Error("Announcement text is required.");
 
   const { data, error } = await supabase
@@ -596,14 +604,14 @@ export async function saveAnnouncement(title) {
 }
 
 export async function deleteAnnouncement(announcementId) {
-  await requireAdminProfile();
+  await requireAdminOrSuperAdminProfile();
 
   const { error } = await supabase.from("announcements").delete().eq("id", announcementId);
   throwIfError(error, "Unable to remove the announcement.");
 }
 
 export async function saveBook({ id = "", title, genre, description, imageFile = null }) {
-  const profile = await requireAdminProfile();
+  const profile = await requireAdminOrSuperAdminProfile();
   if (!title || !genre || !description) {
     throw new Error("Book title, genre, and description are required.");
   }
@@ -654,7 +662,7 @@ export async function saveBook({ id = "", title, genre, description, imageFile =
 }
 
 export async function getAdminBookById(bookId) {
-  await requireAdminProfile();
+  await requireAdminOrSuperAdminProfile();
   const book = await getBookById(bookId);
   if (!book) return null;
 
@@ -670,7 +678,7 @@ export async function getAdminBookById(bookId) {
 }
 
 export async function saveChapter({ bookId, chapterId = "", title, text, accessType = "free" }) {
-  await requireAdminProfile();
+  await requireAdminOrSuperAdminProfile();
   if (!bookId) throw new Error("Select a valid book first.");
   if (!title || !text) throw new Error("Chapter title and chapter text are required.");
 
@@ -715,7 +723,7 @@ export async function saveChapter({ bookId, chapterId = "", title, text, accessT
 }
 
 export async function deleteChapter(bookId, chapterId) {
-  await requireAdminProfile();
+  await requireAdminOrSuperAdminProfile();
 
   const { data, error } = await supabase.from("chapters").select("*").eq("id", chapterId).single();
   throwIfError(error, "Unable to find the chapter.");
@@ -732,7 +740,7 @@ export async function deleteChapter(bookId, chapterId) {
 }
 
 export async function deleteBook(bookId) {
-  await requireAdminProfile();
+  await requireAdminOrSuperAdminProfile();
 
   const { data: book, error: bookError } = await supabase.from("books").select("*").eq("id", bookId).single();
   throwIfError(bookError, "Unable to find the book.");
