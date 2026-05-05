@@ -119,7 +119,6 @@ function renderGenreSections(books) {
   }
 
   const genres = Array.from(grouped.keys()).sort((a, b) => a.localeCompare(b));
-  const genreIds = genres.map((_, index) => `genre-${index}`);
 
   container.innerHTML = `
     <div class="genre-filter-row">
@@ -158,6 +157,13 @@ function fillShelf(id, books) {
   books.forEach((book) => container.appendChild(createBookCard(book)));
 }
 
+// NEW: limit description length for cards
+function truncateText(value, maxLength = 120) {
+  const str = String(value || "");
+  if (str.length <= maxLength) return str;
+  return str.slice(0, maxLength).trimEnd() + "…";
+}
+
 function createBookCard(book) {
   const card = document.createElement("article");
   card.className = "book-card interactive-card";
@@ -173,7 +179,9 @@ function createBookCard(book) {
     <div class="book-meta">
       <p class="book-title">${escapeHtml(book.title)}</p>
       <p class="book-subtitle">${escapeHtml(book.genre || "Uncategorized")}</p>
-      <p class="book-description">${escapeHtml(book.description || "No description yet.")}</p>
+      <p class="book-description">
+        ${escapeHtml(truncateText(book.description || "No description yet.", 120))}
+      </p>
       <div class="book-stats">
         <span>${chapterCount} chapters</span>
         <span>${buyableCount} locked</span>
