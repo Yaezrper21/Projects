@@ -39,12 +39,11 @@ async function initEditBookPage() {
       return;
     }
 
-    // Headings
+    // ===== Book section: prefill + save =====
     if (headingEl) headingEl.textContent = book.title;
     if (bookEditorTitle) bookEditorTitle.textContent = `Edit "${book.title}"`;
     if (chapterBookTitle) chapterBookTitle.textContent = `Chapters for "${book.title}"`;
 
-    // Prefill book form (edit book)
     if (bookForm) {
       const idInput = bookForm.querySelector('input[name="id"]');
       const titleInput = bookForm.querySelector('input[name="title"]');
@@ -56,7 +55,6 @@ async function initEditBookPage() {
       if (genreInput) genreInput.value = book.genre || "";
       if (descInput) descInput.value = book.description || "";
 
-      // Handle Save Book submit (reuse saveBook for update)
       bookForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const formData = new FormData(bookForm);
@@ -89,12 +87,11 @@ async function initEditBookPage() {
       });
     }
 
-    // Prefill chapter form bookId
+    // ===== Chapter form: add / edit =====
     if (chapterForm) {
       const bookIdInput = chapterForm.querySelector('input[name="bookId"]');
       if (bookIdInput) bookIdInput.value = book.id;
 
-      // Handle Save Chapter submit (add or edit)
       chapterForm.addEventListener("submit", async (event) => {
         event.preventDefault();
         const formData = new FormData(chapterForm);
@@ -120,7 +117,7 @@ async function initEditBookPage() {
           setFeedback("Saving chapter...", "info");
           await saveChapter(payload);
           setFeedback("Chapter saved.", "success");
-          window.location.reload(); // reload to refresh chapter list with new text/order
+          window.location.reload();
         } catch (error) {
           console.error(error);
           setFeedback(error.message || "Unable to save the chapter.", "error");
@@ -128,7 +125,7 @@ async function initEditBookPage() {
       });
     }
 
-    // Render chapter list (with Edit/Delete)
+    // ===== Chapter list: render + edit/delete buttons =====
     if (chaptersContainer) {
       if (!book.chapters?.length) {
         chaptersContainer.innerHTML = `<div class="empty-shelf">No chapters yet.</div>`;
@@ -155,7 +152,6 @@ async function initEditBookPage() {
           .join("");
       }
 
-      // Handle Edit/Delete clicks on chapters
       chaptersContainer.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
@@ -163,7 +159,7 @@ async function initEditBookPage() {
         const editId = target.dataset.editChapter;
         const deleteId = target.dataset.deleteChapter;
 
-        // Edit chapter: fill the chapter form with existing data
+        // Edit chapter: prefill the chapter form
         if (editId && chapterForm && book.chapters) {
           const ch = book.chapters.find((c) => c.id === editId);
           if (!ch) return;
