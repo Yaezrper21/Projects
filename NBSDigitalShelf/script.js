@@ -291,6 +291,10 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
             <span>${Number(book.todayViews || 0)} views today</span>
             <span>${(book.chapters || []).length} total chapters</span>
           </div>
+          <div class="book-actions-row">
+            <button class="primary-button" type="button" data-book-buy-chapters>Buy Chapters</button>
+            <button class="ghost-button" type="button" data-book-buy-book>Buy Book</button>
+          </div>
           <p class="muted-copy align-left">${currentUser ? `Signed in as ${escapeHtml(currentUser.username)}.` : "Guest mode: paid chapters require an account and purchase."}</p>
         </div>
       </div>
@@ -301,9 +305,52 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
 
   const chapterList = content.querySelector("[data-modal-chapters]");
   const feedback = content.querySelector("[data-modal-feedback]");
+  const buyChaptersButton = content.querySelector("[data-book-buy-chapters]");
+  const buyBookButton = content.querySelector("[data-book-buy-book]");
+
   if (!chapterList) return;
   if (flashMessage) {
     setModalFeedback(feedback, flashMessage, flashState);
+  }
+
+  // Buy Chapters: just guide user to chapter list
+  if (buyChaptersButton) {
+    buyChaptersButton.addEventListener("click", () => {
+      chapterList.scrollIntoView({ behavior: "smooth", block: "start" });
+      setModalFeedback(feedback, "Scroll down and choose which chapter to buy.", "info");
+    });
+  }
+
+  // Buy Book: purchase all paid chapters
+  if (buyBookButton) {
+    buyBookButton.addEventListener("click", async () => {
+      const paidChapters = (book.chapters || []).filter((ch) => ch.isPaid);
+
+      if (!paidChapters.length) {
+        setModalFeedback(feedback, "This book has no buyable chapters.", "info");
+        return;
+      }
+
+      try {
+        for (const chapter of paidChapters) {
+          const result = await window.nbsShelfData?.purchaseChapter(book.id, chapter.id);
+          if (!result?.ok) {
+            setModalFeedback(feedback, result?.message || "Unable to complete purchase.", "error");
+            return;
+          }
+        }
+
+        setModalFeedback(
+          feedback,
+          "You bought all paid chapters in this book. They are now unlocked in your account.",
+          "success"
+        );
+        await rerenderAfterBookChange(book.id, "Book purchase complete.", "success");
+      } catch (error) {
+        console.error(error);
+        setModalFeedback(feedback, "Something went wrong while buying the book.", "error");
+      }
+    });
   }
 
   if (!(book.chapters || []).length) {
