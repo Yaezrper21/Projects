@@ -14,6 +14,8 @@ import {
 } from "./supabase-client.js";
 
 let cachedProfile = null;
+let cacheTime = 0;
+const CACHE_TTL = 1000 * 60 * 2;
 
 function throwIfError(error, fallbackMessage) {
   if (error) throw new Error(error.message || fallbackMessage);
@@ -39,7 +41,9 @@ function normalizeProfile(profile, session) {
     contactNumber: profile.contact_number || "",
     address: profile.address || "",
     avatarPath: profile.avatar_path || "",
-    avatarUrl: profile.avatar_path ? getPublicBucketUrl(STORAGE_BUCKETS.profileAvatars, profile.avatar_path) : "",
+    avatarUrl: profile.avatar_path
+      ? getPublicBucketUrl(STORAGE_BUCKETS.profileAvatars, profile.avatar_path)
+      : "",
     authType: session?.user?.app_metadata?.provider || "password",
     createdAt: profile.created_at || ""
   };
@@ -67,7 +71,11 @@ export async function getSession() {
 }
 
 export async function getCurrentProfile(force = false) {
-  if (!force && cachedProfile) return cachedProfile;
+  const now = Date.now();
+
+  if (!force && cachedProfile && now - cacheTime < CACHE_TTL) {
+    return cachedProfile;
+  }
 
   const session = await getSession();
   if (!session?.user) {
@@ -76,10 +84,17 @@ export async function getCurrentProfile(force = false) {
   }
 
   await ensureProfileRow(session);
-  const { data, error } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", session.user.id)
+    .maybeSingle();
+
   throwIfError(error, "Unable to load the current profile.");
 
   cachedProfile = normalizeProfile(data, session);
+  cacheTime = now;
   return cachedProfile;
 }
 
@@ -126,8 +141,8 @@ export async function signOut() {
 
 function sortChapters(chapters) {
   return [...chapters].sort((a, b) => {
-    const left = Number(a.chapter_order || 0);
-    const right = Number(b.chapter_order || 0);
+    const left = Number(a.chapter_order ?? Infinity);
+    const right = Number(b.chapter_order ?? Infinity);
     if (left !== right) return left - right;
     return String(a.title || "").localeCompare(String(b.title || ""));
   });
@@ -208,7 +223,7 @@ export async function getBooks() {
 }
 
 async function getPurchasedChapterIds(bookId, profile) {
-  if (!profile || isAdminRole(profile.role)) return new Set();
+  if (!profile) return new Set();
 
   const { data, error } = await supabase
     .from("orders")
@@ -220,7 +235,6 @@ async function getPurchasedChapterIds(bookId, profile) {
   throwIfError(error, "Unable to load chapter access.");
   return new Set((data || []).map((item) => item.chapter_id));
 }
-
 export async function getBookById(bookId) {
   const [profile, books] = await Promise.all([getCurrentProfile(), fetchBookData([bookId])]);
   const book = books.find((item) => item.id === bookId) || null;
@@ -371,7 +385,8 @@ export async function getMyBooks() {
 export async function downloadChapterText(filePath) {
   const { data, error } = await supabase.storage.from(STORAGE_BUCKETS.chapterFiles).download(filePath);
   throwIfError(error, "Unable to load the chapter text.");
-  return data.text();
+  if (!data) throw new Error("File is missing or empty.");
+  return await data.text();
 }
 
 export async function purchaseChapter(bookId, chapterId) {
@@ -460,13 +475,10 @@ export async function uploadProfileAvatar(file) {
   if (!file) throw new Error("Profile picture is required.");
 
   const path = buildStoragePath(profile.id, `avatar-${Date.now()}.${fileExtension(file.name)}`);
-  
-  // Convert file to blob if needed
-  const fileBlob = file instanceof Blob ? file : new Blob([file], { type: file.type || "image/jpeg" });
-  
+
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKETS.profileAvatars)
-    .upload(path, fileBlob, { upsert: true, cacheControl: "3600" });
+    .upload(path, file, { upsert: true, cacheControl: "3600" });
 
   throwIfError(uploadError, "Unable to upload the profile picture.");
 
@@ -507,17 +519,13 @@ async function requireAdminOrSuperAdminProfile() {
 }
 
 export async function getAdminDashboardData() {
-  // 1. Get current auth user
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
+  const session = await getSession();
+  const user = session?.user;
 
-  if (userError || !user) {
+  if (!user) {
     throw new Error("You must be logged in to access the admin dashboard.");
   }
 
-  // 2. Load profile (only columns that actually exist)
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id, username, email, role, contact_number, address")
@@ -525,40 +533,28 @@ export async function getAdminDashboardData() {
     .single();
 
   if (profileError || !profile) {
-    console.error(profileError);
     throw new Error("Unable to load your profile.");
   }
 
-  // 3. Role guard: allow BOTH admin and super_admin
   if (!isAdminRole(profile.role)) {
     throw new Error("Only admin or super admin can manage books.");
   }
 
-  // 4. Load stats (users, orders, books, announcements, page views, accounts)
   const [
-    { data: usersData, error: usersError },
-    { data: ordersData, error: ordersError },
-    { data: booksData, error: booksError },
-    { data: announcementsData, error: announcementsError },
-    { data: pageViewsData, error: pageViewsError },
-    { data: accountsData, error: accountsError },
+    { data: usersData },
+    { data: ordersData },
+    { data: booksData },
+    { data: announcementsData },
+    { data: pageViewsData },
+    { data: accountsData }
   ] = await Promise.all([
     supabase.from("profiles").select("id, role"),
     supabase.from("orders").select("id"),
     supabase.from("books").select("id, title, genre"),
     supabase.from("announcements").select("id, title"),
     supabase.from("page_views").select("id"),
-    supabase.from("profiles").select(
-      "id, username, email, role, contact_number, address"
-    ),
+    supabase.from("profiles").select("id, username, email, role, contact_number, address")
   ]);
-
-  if (usersError) console.error("Error loading users", usersError);
-  if (ordersError) console.error("Error loading orders", ordersError);
-  if (booksError) console.error("Error loading books", booksError);
-  if (announcementsError) console.error("Error loading announcements", announcementsError);
-  if (pageViewsError) console.error("Error loading page views", pageViewsError);
-  if (accountsError) console.error("Error loading accounts", accountsError);
 
   const users = usersData ?? [];
   const books = booksData ?? [];
@@ -573,7 +569,7 @@ export async function getAdminDashboardData() {
     orders: (ordersData ?? []).length,
     books: books.length,
     announcements: announcements.length,
-    views: pageViews.length,
+    views: pageViews.length
   };
 
   return {
@@ -582,223 +578,15 @@ export async function getAdminDashboardData() {
       username: profile.username ?? "",
       email: profile.email ?? "",
       role: profile.role ?? "user",
-      authType: "password", // you can store this in profiles later if you want
+      authType: "password",
       contactNumber: profile.contact_number ?? "",
-      address: profile.address ?? "",
+      address: profile.address ?? ""
     },
     stats,
     books,
     announcements,
-    accounts: allAccounts,
+    accounts: allAccounts
   };
-}
-
-export async function saveAnnouncement(title) {
-  const profile = await requireAdminOrSuperAdminProfile();
-  if (!title) throw new Error("Announcement text is required.");
-
-  const { data, error } = await supabase
-    .from("announcements")
-    .insert({ title, created_by: profile.id })
-    .select("*")
-    .single();
-
-  throwIfError(error, "Unable to create the announcement.");
-  return data;
-}
-
-export async function deleteAnnouncement(announcementId) {
-  await requireAdminOrSuperAdminProfile();
-
-  const { error } = await supabase.from("announcements").delete().eq("id", announcementId);
-  throwIfError(error, "Unable to remove the announcement.");
-}
-
-export async function saveBook({ id = "", title, genre, description, imageFile = null }) {
-  const profile = await requireAdminOrSuperAdminProfile();
-  if (!title || !genre || !description) {
-    throw new Error("Book title, genre, and description are required.");
-  }
-
-  let bookRow;
-
-  if (id) {
-    const { data, error } = await supabase
-      .from("books")
-      .update({ title, genre, description })
-      .eq("id", id)
-      .select("*")
-      .single();
-
-    throwIfError(error, "Unable to update the book.");
-    bookRow = data;
-  } else {
-    const { data, error } = await supabase
-      .from("books")
-      .insert({ title, genre, description, created_by: profile.id })
-      .select("*")
-      .single();
-
-    throwIfError(error, "Unable to create the book.");
-    bookRow = data;
-  }
-
-  if (imageFile) {
-    const coverPath = buildStoragePath(bookRow.id, `cover-${Date.now()}.${fileExtension(imageFile.name)}`);
-    
-    // Convert file to blob if needed - ensure proper MIME type
-    const fileBlob = imageFile instanceof Blob ? imageFile : new Blob([imageFile], { type: imageFile.type || "image/jpeg" });
-    
-    const { error: uploadError } = await supabase.storage
-      .from(STORAGE_BUCKETS.bookCovers)
-      .upload(coverPath, fileBlob, { upsert: true, cacheControl: "3600" });
-
-    throwIfError(uploadError, "Unable to upload the cover picture.");
-
-    const { data, error } = await supabase
-      .from("books")
-      .update({ cover_path: coverPath })
-      .eq("id", bookRow.id)
-      .select("*")
-      .single();
-
-    throwIfError(error, "Unable to save the cover picture.");
-    bookRow = data;
-  }
-
-  return getBookById(bookRow.id);
-}
-
-export async function getAdminBookById(bookId) {
-  await requireAdminOrSuperAdminProfile();
-  const book = await getBookById(bookId);
-  if (!book) return null;
-
-  return {
-    ...book,
-    chapters: await Promise.all(
-      (book.chapters || []).map(async (chapter) => ({
-        ...chapter,
-        text: await downloadChapterText(chapter.filePath)
-      }))
-    )
-  };
-}
-
-export async function saveChapter({ bookId, chapterId = "", title, text, accessType = "free" }) {
-  await requireAdminOrSuperAdminProfile();
-  if (!bookId) throw new Error("Select a valid book first.");
-  if (!title || !text) throw new Error("Chapter title and chapter text are required.");
-
-  const { data: currentChapters, error: chaptersError } = await supabase
-    .from("chapters")
-    .select("*")
-    .eq("book_id", bookId)
-    .order("chapter_order", { ascending: true });
-
-  throwIfError(chaptersError, "Unable to load the chapter list.");
-
-  const existing = (currentChapters || []).find((item) => item.id === chapterId) || null;
-  const nextChapterId = chapterId || crypto.randomUUID();
-  const nextOrder = existing
-    ? Number(existing.chapter_order || 1)
-    : (currentChapters || []).length + 1;
-
-  const filePath = existing?.file_path || buildStoragePath(bookId, `${nextChapterId}.txt`);
-  const chapterFile = createTextFile(text, `${nextChapterId}.txt`);
-
-  const { error: uploadError } = await supabase.storage
-    .from(STORAGE_BUCKETS.chapterFiles)
-    .upload(filePath, chapterFile, { upsert: true, cacheControl: "3600", contentType: "text/plain;charset=utf-8" });
-
-  throwIfError(uploadError, "Unable to upload the chapter file.");
-
-  const payload = {
-    id: nextChapterId,
-    book_id: bookId,
-    title,
-    file_path: filePath,
-    is_paid: accessType === "paid",
-    chapter_order: nextOrder
-  };
-
-  const { error } = existing
-    ? await supabase.from("chapters").update(payload).eq("id", nextChapterId)
-    : await supabase.from("chapters").insert(payload);
-
-  throwIfError(error, "Unable to save the chapter.");
-  return getAdminBookById(bookId);
-}
-
-export async function deleteChapter(bookId, chapterId) {
-  await requireAdminOrSuperAdminProfile();
-
-  const { data, error } = await supabase.from("chapters").select("*").eq("id", chapterId).single();
-  throwIfError(error, "Unable to find the chapter.");
-
-  if (data?.file_path) {
-    const { error: storageError } = await supabase.storage.from(STORAGE_BUCKETS.chapterFiles).remove([data.file_path]);
-    throwIfError(storageError, "Unable to remove the chapter file.");
-  }
-
-  const { error: deleteError } = await supabase.from("chapters").delete().eq("id", chapterId);
-  throwIfError(deleteError, "Unable to remove the chapter.");
-
-  return getAdminBookById(bookId);
-}
-
-export async function deleteBook(bookId) {
-  await requireAdminOrSuperAdminProfile();
-
-  const { data: book, error: bookError } = await supabase.from("books").select("*").eq("id", bookId).single();
-  throwIfError(bookError, "Unable to find the book.");
-
-  const { data: chapters, error: chaptersError } = await supabase.from("chapters").select("file_path").eq("book_id", bookId);
-  throwIfError(chaptersError, "Unable to load the chapter files.");
-
-  const pathsToDelete = [
-    ...(book?.cover_path ? [book.cover_path] : []),
-    ...((chapters || []).map((item) => item.file_path).filter(Boolean))
-  ];
-
-  if (pathsToDelete.length) {
-    const coverPaths = pathsToDelete.filter((path) => !path.endsWith(".txt"));
-    const chapterPaths = pathsToDelete.filter((path) => path.endsWith(".txt"));
-
-    if (coverPaths.length) {
-      const { error } = await supabase.storage.from(STORAGE_BUCKETS.bookCovers).remove(coverPaths);
-      throwIfError(error, "Unable to remove the cover picture.");
-    }
-
-    if (chapterPaths.length) {
-      const { error } = await supabase.storage.from(STORAGE_BUCKETS.chapterFiles).remove(chapterPaths);
-      throwIfError(error, "Unable to remove the chapter files.");
-    }
-  }
-
-  const { error } = await supabase.from("books").delete().eq("id", bookId);
-  throwIfError(error, "Unable to remove the book.");
-}
-
-export async function updateMemberProfile({ id, username, role, contactNumber, address }) {
-  await requireSuperAdminProfile();
-  if (!id) throw new Error("Select a valid member first.");
-  if (!username) throw new Error("Username is required.");
-
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({
-      username,
-      role,
-      contact_number: contactNumber,
-      address
-    })
-    .eq("id", id)
-    .select("*")
-    .single();
-
-  throwIfError(error, "Unable to update the member profile.");
-  return normalizeProfile(data, { user: { app_metadata: { provider: "password" }, email: data.email } });
 }
 
 export async function waitForSessionAfterRedirect(retries = 12) {
@@ -814,7 +602,6 @@ export async function waitForSessionAfterRedirect(retries = 12) {
   return null;
 }
 
-// Export all functions to window.nbsShelfData for use in script.js
 if (typeof window !== "undefined") {
   window.nbsShelfData = {
     getBooks,
@@ -831,14 +618,6 @@ if (typeof window !== "undefined") {
     updateOwnProfile,
     uploadProfileAvatar,
     getAdminDashboardData,
-    saveAnnouncement,
-    deleteAnnouncement,
-    saveBook,
-    getAdminBookById,
-    saveChapter,
-    deleteChapter,
-    deleteBook,
-    updateMemberProfile,
     signInWithPassword,
     signUpWithPassword,
     signInWithOAuth,
