@@ -33,6 +33,80 @@ async function initAdminPage() {
     feedback.dataset.state = state;
   }
 
+  // Create Book form handler
+  if (bookForm) {
+    bookForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const formData = new FormData(bookForm);
+      const title = (formData.get("title") || "").toString().trim();
+      const genre = (formData.get("genre") || "").toString().trim();
+      const description = (formData.get("description") || "").toString().trim();
+      const imageFile = formData.get("image");
+
+      if (!title || !genre || !description) {
+        setFeedback("Book title, genre, and description are required.", "error");
+        return;
+      }
+
+      try {
+        setFeedback("Creating book...", "info");
+        await saveBook({
+          title,
+          genre,
+          description,
+          imageFile: imageFile instanceof File ? imageFile : null
+        });
+        setFeedback("Book created.", "success");
+        bookForm.reset();
+
+        // Refresh books list
+        const refreshed = await getAdminDashboardData();
+        const refreshedBooks = refreshed.books || [];
+
+        if (!booksContainer) return;
+
+        if (!refreshedBooks.length) {
+          booksContainer.innerHTML =
+            `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
+        } else {
+          booksContainer.innerHTML = refreshedBooks
+            .map(
+              (book) => `
+              <article class="management-row">
+                <div>
+                  <p class="management-title">${escapeHtml(book.title)}</p>
+                  <p class="management-meta">
+                    ${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters
+                  </p>
+                </div>
+                <div class="management-actions">
+                  <button
+                    class="ghost-button compact-ghost"
+                    type="button"
+                    data-admin-edit-book="${book.id}"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="ghost-button compact-ghost"
+                    type="button"
+                    data-admin-delete-book="${book.id}"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </article>
+            `
+            )
+            .join("");
+        }
+      } catch (error) {
+        console.error(error);
+        setFeedback(error.message || "Unable to create the book.", "error");
+      }
+    });
+  }
+
   try {
     // Load dashboard data (will throw if not admin)
     const data = await getAdminDashboardData();
@@ -58,10 +132,11 @@ async function initAdminPage() {
       card.hidden = !isSuperAdmin;
     });
 
-               // Books list
+    // Books list
     if (booksContainer) {
       if (!books.length) {
-        booksContainer.innerHTML = `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
+        booksContainer.innerHTML =
+          `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
       } else {
         booksContainer.innerHTML = books
           .map(
@@ -69,7 +144,9 @@ async function initAdminPage() {
           <article class="management-row">
             <div>
               <p class="management-title">${escapeHtml(book.title)}</p>
-              <p class="management-meta">${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters</p>
+              <p class="management-meta">
+                ${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters
+              </p>
             </div>
             <div class="management-actions">
               <button
@@ -119,7 +196,8 @@ async function initAdminPage() {
             const refreshed = await getAdminDashboardData();
             const refreshedBooks = refreshed.books || [];
             if (!refreshedBooks.length) {
-              booksContainer.innerHTML = `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
+              booksContainer.innerHTML =
+                `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
             } else {
               booksContainer.innerHTML = refreshedBooks
                 .map(
@@ -127,7 +205,9 @@ async function initAdminPage() {
                 <article class="management-row">
                   <div>
                     <p class="management-title">${escapeHtml(book.title)}</p>
-                    <p class="management-meta">${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters</p>
+                    <p class="management-meta">
+                      ${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters
+                    </p>
                   </div>
                   <div class="management-actions">
                     <button
@@ -193,7 +273,8 @@ async function initAdminPage() {
           const refreshedAnnouncements = refreshed.announcements || [];
           if (announcementsContainer) {
             if (!refreshedAnnouncements.length) {
-              announcementsContainer.innerHTML = `<div class="empty-shelf">No announcements yet.</div>`;
+              announcementsContainer.innerHTML =
+                `<div class="empty-shelf">No announcements yet.</div>`;
             } else {
               announcementsContainer.innerHTML = refreshedAnnouncements
                 .map(
@@ -202,7 +283,13 @@ async function initAdminPage() {
                   <div>
                     <p class="management-title">${escapeHtml(item.title)}</p>
                   </div>
-                  <button class="ghost-button compact-ghost" type="button" data-admin-delete-announcement="${item.id}">Delete</button>
+                  <button
+                    class="ghost-button compact-ghost"
+                    type="button"
+                    data-admin-delete-announcement="${item.id}"
+                  >
+                    Delete
+                  </button>
                 </article>
               `
                 )
@@ -232,7 +319,8 @@ async function initAdminPage() {
           const refreshed = await getAdminDashboardData();
           const refreshedAnnouncements = refreshed.announcements || [];
           if (!refreshedAnnouncements.length) {
-            announcementsContainer.innerHTML = `<div class="empty-shelf">No announcements yet.</div>`;
+            announcementsContainer.innerHTML =
+              `<div class="empty-shelf">No announcements yet.</div>`;
           } else {
             announcementsContainer.innerHTML = refreshedAnnouncements
               .map(
@@ -241,7 +329,13 @@ async function initAdminPage() {
                 <div>
                   <p class="management-title">${escapeHtml(item.title)}</p>
                 </div>
-                <button class="ghost-button compact-ghost" type="button" data-admin-delete-announcement="${item.id}">Delete</button>
+                <button
+                  class="ghost-button compact-ghost"
+                  type="button"
+                  data-admin-delete-announcement="${item.id}"
+                >
+                  Delete
+                </button>
               </article>
             `
               )
