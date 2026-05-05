@@ -519,7 +519,9 @@ export async function getAdminDashboardData() {
     supabase.from("books").select("id, title, genre, chapters"),
     supabase.from("announcements").select("id, title"),
     supabase.from("site_views").select("id"),
-    supabase.from("profiles").select("id, username, email, role, auth_type, contact_number, address"),
+    supabase.from("profiles").select(
+      "id, username, email, role, auth_type, contact_number, address"
+    ),
   ]);
 
   if (usersError) console.error("Error loading users", usersError);
@@ -559,6 +561,7 @@ export async function getAdminDashboardData() {
     announcements,
     accounts: allAccounts,
   };
+}
 
   const booksPromise = fetchBookData();
   const announcementsPromise = getAnnouncements();
