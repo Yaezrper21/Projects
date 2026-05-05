@@ -25,7 +25,7 @@ async function initAdminPage() {
   const booksContainer = document.querySelector("[data-admin-books]");
   const announcementsContainer = document.querySelector("[data-admin-announcements]");
   const profileContainer = document.querySelector("[data-admin-profile]");
-  const logoutButton = document.querySelector('[data-action="logout"]');
+  const logoutButton = document.querySelector("[data-logout]");
 
   function setFeedback(message, state = "info") {
     if (!feedback) return;
