@@ -617,6 +617,19 @@ export async function saveAnnouncement(title) {
   return data;
 }
 
+export async function updateAnnouncement(id, title) {
+  const profile = await requireAdminOrSuperAdminProfile();
+  if (!title) throw new Error("Announcement text is required.");
+
+  const { error } = await supabase
+    .from("announcements")
+    .update({ title })
+    .eq("id", id)
+    .eq("created_by", profile.id);
+
+  throwIfError(error, "Unable to update the announcement.");
+}
+
 export async function deleteAnnouncement(announcementId) {
   await requireAdminOrSuperAdminProfile();
 
@@ -838,6 +851,7 @@ if (typeof window !== "undefined") {
     uploadProfileAvatar,
     getAdminDashboardData,
     saveAnnouncement,
+    updateAnnouncement,
     deleteAnnouncement,
     saveBook,
     getAdminBookById,
