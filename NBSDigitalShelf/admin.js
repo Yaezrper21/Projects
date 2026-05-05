@@ -27,6 +27,9 @@ async function initAdminPage() {
   const profileContainer = document.querySelector("[data-admin-profile]");
   const logoutButton = document.querySelector("[data-logout]");
 
+  // Track which announcement is being edited (null = create mode)
+  let currentAnnouncementId = null;
+
   function setFeedback(message, state = "info") {
     if (!feedback) return;
     feedback.textContent = message;
@@ -251,7 +254,7 @@ async function initAdminPage() {
       });
     }
 
-    // Announcement form
+    // Announcement form (create or update)
     if (announcementForm) {
       announcementForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -264,10 +267,25 @@ async function initAdminPage() {
         }
 
         try {
-          setFeedback("Saving announcement...", "info");
-          await saveAnnouncement(title);
-          setFeedback("Announcement created.", "success");
+          if (currentAnnouncementId) {
+            // Update existing announcement (using direct Supabase call)
+            setFeedback("Updating announcement...", "info");
+            const { error } = await window.supabase
+              .from("announcements")
+              .update({ title })
+              .eq("id", currentAnnouncementId);
+
+            if (error) throw error;
+            setFeedback("Announcement updated.", "success");
+          } else {
+            // Create new announcement
+            setFeedback("Saving announcement...", "info");
+            await saveAnnouncement(title);
+            setFeedback("Announcement created.", "success");
+          }
+
           announcementForm.reset();
+          currentAnnouncementId = null;
 
           const refreshed = await getAdminDashboardData();
           const refreshedAnnouncements = refreshed.announcements || [];
@@ -283,13 +301,22 @@ async function initAdminPage() {
                   <div>
                     <p class="management-title">${escapeHtml(item.title)}</p>
                   </div>
-                  <button
-                    class="ghost-button compact-ghost"
-                    type="button"
-                    data-admin-delete-announcement="${item.id}"
-                  >
-                    Delete
-                  </button>
+                  <div class="management-actions">
+                    <button
+                      class="ghost-button compact-ghost"
+                      type="button"
+                      data-admin-edit-announcement="${item.id}"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      class="ghost-button compact-ghost"
+                      type="button"
+                      data-admin-delete-announcement="${item.id}"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </article>
               `
                 )
@@ -298,22 +325,51 @@ async function initAdminPage() {
           }
         } catch (error) {
           console.error(error);
-          setFeedback(error.message || "Unable to create the announcement.", "error");
+          setFeedback(error.message || "Unable to save the announcement.", "error");
         }
       });
     }
 
-    // Delete announcement buttons
+    // Edit + Delete announcement buttons
     if (announcementsContainer) {
       announcementsContainer.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
-        const id = target.dataset.adminDeleteAnnouncement;
-        if (!id) return;
+
+        const deleteId = target.dataset.adminDeleteAnnouncement;
+        const editId = target.dataset.adminEditAnnouncement;
+
+        // Edit: load into form
+        if (editId && announcementForm) {
+          try {
+            const data = await getAdminDashboardData();
+            const announcement =
+              (data.announcements || []).find((a) => String(a.id) === String(editId));
+
+            if (!announcement) {
+              setFeedback("Unable to find that announcement.", "error");
+              return;
+            }
+
+            const titleInput = announcementForm.querySelector('input[name="title"]');
+            if (titleInput) {
+              titleInput.value = announcement.title || "";
+            }
+            currentAnnouncementId = announcement.id;
+            setFeedback("Editing announcement. Save to update.", "info");
+          } catch (error) {
+            console.error(error);
+            setFeedback(error.message || "Unable to load the announcement.", "error");
+          }
+          return;
+        }
+
+        // Delete announcement
+        if (!deleteId) return;
 
         try {
           setFeedback("Removing announcement...", "info");
-          await deleteAnnouncement(id);
+          await deleteAnnouncement(deleteId);
           setFeedback("Announcement removed.", "success");
 
           const refreshed = await getAdminDashboardData();
@@ -329,13 +385,22 @@ async function initAdminPage() {
                 <div>
                   <p class="management-title">${escapeHtml(item.title)}</p>
                 </div>
-                <button
-                  class="ghost-button compact-ghost"
-                  type="button"
-                  data-admin-delete-announcement="${item.id}"
-                >
-                  Delete
-                </button>
+                <div class="management-actions">
+                  <button
+                    class="ghost-button compact-ghost"
+                    type="button"
+                    data-admin-edit-announcement="${item.id}"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    class="ghost-button compact-ghost"
+                    type="button"
+                    data-admin-delete-announcement="${item.id}"
+                  >
+                    Delete
+                  </button>
+                </div>
               </article>
             `
               )
