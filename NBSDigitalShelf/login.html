@@ -58,6 +58,89 @@
       <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">Access National Book Store Website</a>
     </main>
   </div>
+  
+  <!-- Existing auth UI helpers -->
   <script src="auth.js"></script>
+
+  <!-- New: actual login logic -->
+  <script type="module">
+    import { signInWithPassword, getCurrentProfile, signInWithOAuth } from "./supabase-data.js";
+
+    const form = document.querySelector('[data-auth-form="login"]');
+    const feedback = document.querySelector('[data-auth-feedback]');
+    const sessionBanner = document.querySelector('[data-session-banner]');
+    const socialButtons = document.querySelectorAll('[data-social]');
+
+    function showFeedback(message, type = "error") {
+      if (!feedback) return;
+      feedback.textContent = message;
+      feedback.dataset.type = type; // you can style [data-type="error"/"success"] in CSS if you want
+    }
+
+    async function handleEmailLogin(event) {
+      event.preventDefault();
+      if (!form) return;
+
+      const email = form.elements.email.value.trim();
+      const password = form.elements.password.value;
+
+      if (!email || !password) {
+        showFeedback("Please enter your email and password.");
+        return;
+      }
+
+      showFeedback("Signing in...", "info");
+
+      try {
+        await signInWithPassword(email, password);
+
+        // Force refresh of profile to get latest role
+        const profile = await getCurrentProfile(true);
+
+        if (!profile) {
+          showFeedback("Signed in, but no profile found.");
+          return;
+        }
+
+        // Optional: show “logged in as …” banner
+        if (sessionBanner) {
+          sessionBanner.textContent = `Logged in as ${profile.username} (${profile.role})`;
+        }
+
+        // Redirect based on role
+        if (profile.role === "super_admin") {
+          window.location.href = "super-admin.html";
+        } else if (profile.role === "admin") {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "index.html";
+        }
+      } catch (err) {
+        console.error(err);
+        showFeedback(err.message || "Unable to sign in.");
+      }
+    }
+
+    async function handleSocialClick(event) {
+      const button = event.currentTarget;
+      const providerName = button.dataset.social; // "Google" or "Facebook"
+      const provider = providerName.toLowerCase();
+
+      try {
+        await signInWithOAuth(provider, "index.html");
+      } catch (err) {
+        console.error(err);
+        showFeedback(err.message || `Unable to sign in with ${providerName}.`);
+      }
+    }
+
+    if (form) {
+      form.addEventListener("submit", handleEmailLogin);
+    }
+
+    socialButtons.forEach((btn) => {
+      btn.addEventListener("click", handleSocialClick);
+    });
+  </script>
 </body>
 </html>
