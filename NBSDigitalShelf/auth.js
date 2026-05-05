@@ -7,7 +7,7 @@ async function initAuthUi() {
   const profileLink = document.querySelector('a[href="profile.html"]');
   const adminLink = document.querySelector('a[href="admin.html"]');
   const superAdminLink = document.querySelector('a[href="super-admin.html"]');
-  const logoutButton = document.querySelector('[data-logout]'); // optional, only if you add one
+  const logoutButton = document.querySelector("[data-logout]"); // profile/logout buttons
 
   try {
     const profile = await getCurrentProfile();
