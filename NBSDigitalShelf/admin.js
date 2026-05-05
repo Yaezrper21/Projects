@@ -79,6 +79,19 @@ async function initAdminPage() {
       }
     }
 
+        // Handle Edit Book clicks: go to edit-book.html?id=<bookId>
+    if (booksContainer) {
+      booksContainer.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const bookId = target.dataset.adminEditBook;
+        if (!bookId) return;
+
+        window.location.href = `edit-book.html?id=${bookId}`;
+      });
+    }
+
     // Announcements list
     if (announcementsContainer) {
       if (!announcements.length) {
