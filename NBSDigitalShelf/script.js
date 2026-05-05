@@ -3,9 +3,13 @@ const libraryViews = document.querySelectorAll(".library-view");
 let currentBooks = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  bindLibraryTabs();
-  handleLibraryHash();
-  void renderDynamicContent();
+  const page = document.body.dataset.page;
+
+  if (page === "home" || page === "library" || page === "search" || page === "profile") {
+    bindLibraryTabs();
+    handleLibraryHash();
+    void renderDynamicContent();
+  }
 });
 
 function bindLibraryTabs() {
