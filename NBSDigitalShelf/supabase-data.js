@@ -146,6 +146,7 @@ function mapBookRecord(book, chapters, views, favorites, currentProfile) {
     description: book.description,
     imagePath: book.cover_path || "",
     imageUrl: book.cover_path ? getPublicBucketUrl(STORAGE_BUCKETS.bookCovers, book.cover_path) : "",
+    imageDataUrl: book.cover_path ? getPublicBucketUrl(STORAGE_BUCKETS.bookCovers, book.cover_path) : "",
     createdAt: book.created_at,
     updatedAt: book.updated_at,
     chapterCount: bookChapters.length,
@@ -269,6 +270,22 @@ export async function getBookById(bookId) {
         isGuest: false
       };
     })
+  };
+}
+
+export async function getChapterAccess(bookId, chapterId) {
+  const profile = await getCurrentProfile();
+  const book = await getBookById(bookId);
+
+  if (!book) return null;
+
+  const chapter = book.chapters?.find((ch) => ch.id === chapterId);
+  if (!chapter) return null;
+
+  return {
+    canRead: chapter.canRead,
+    requiresPurchase: chapter.requiresPurchase,
+    isGuest: !profile
   };
 }
 
@@ -779,4 +796,40 @@ export async function waitForSessionAfterRedirect(retries = 12) {
     await delay(300);
   }
   return null;
+}
+
+// Export all functions to window.nbsShelfData for use in script.js
+if (typeof window !== "undefined") {
+  window.nbsShelfData = {
+    getBooks,
+    getAnnouncements,
+    getBookById,
+    getChapterAccess,
+    incrementBookView,
+    getCurrentUser: getCurrentProfile,
+    purchaseChapter,
+    toggleFavorite,
+    getMyBooks,
+    downloadChapterText,
+    getOrdersForCurrentUser,
+    updateOwnProfile,
+    uploadProfileAvatar,
+    getAdminDashboardData,
+    saveAnnouncement,
+    deleteAnnouncement,
+    saveBook,
+    getAdminBookById,
+    saveChapter,
+    deleteChapter,
+    deleteBook,
+    updateMemberProfile,
+    signInWithPassword,
+    signUpWithPassword,
+    signInWithOAuth,
+    signOut,
+    getSession,
+    trackPageView,
+    createTopupOrder,
+    waitForSessionAfterRedirect
+  };
 }
