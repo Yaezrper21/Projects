@@ -4,127 +4,135 @@
   <meta charset="UTF-8" />
   <title>Buy Book • NBS Digital Shelf</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Match index.html fonts if you want the exact same typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body data-page="buy-book">
-  <header class="site-header">
-    <div class="header-inner">
-      <a href="index.html" class="logo">NBS Digital Shelf</a>
+  <div class="site-shell">
+    <!-- HEADER: copied from index.html for consistent navbar -->
+    <header class="topbar">
+      <a class="brand" href="index.html">NBS Digital Shelf</a>
       <nav class="main-nav">
-        <a href="index.html" class="nav-link" data-page="home">Home</a>
-        <a href="library.html" class="nav-link" data-page="library">Library</a>
-        <a href="search.html" class="nav-link" data-page="search">Search</a>
-        <a href="my-books.html" class="nav-link" data-page="my-books">My Books</a>
-        <a href="profile.html" class="nav-link" data-page="profile">Profile</a>
-        <a href="admin.html" class="nav-link" data-page="admin">Admin</a>
-        <a href="super-admin.html" class="nav-link" data-page="super-admin">Super Admin</a>
+        <a class="nav-link" href="index.html" data-page="home">Home</a>
+        <a class="nav-link" href="library.html" data-page="library">Library</a>
+        <a class="nav-link" href="topup.html" data-page="topup">Top-Up</a>
+        <a class="nav-link" href="order.html" data-page="order">Order</a>
+        <a class="nav-link" href="search.html" data-page="search">Search</a>
+        <a class="nav-link" href="profile.html" data-page="profile">Profile</a>
+        <a class="nav-link" href="admin.html" data-page="admin">Admin Dashboard</a>
+        <a class="nav-link" href="super-admin.html" data-page="super-admin">Super Admin</a>
+        <a class="nav-link" href="login.html" data-page="login">Login</a>
+        <a class="nav-link" href="signup.html" data-page="signup">Sign Up</a>
       </nav>
-    </div>
-  </header>
+    </header>
 
-  <main class="page-main">
-    <section class="panel">
-      <h1 class="panel-title">Buy Physical Copy</h1>
-      <p class="feature-text">
-        Complete the details below to request a physical copy of this book.
-      </p>
+    <main>
+      <section class="panel">
+        <h1 class="panel-title">Buy Physical Copy</h1>
+        <p class="feature-text">
+          Complete the details below to request a physical copy of this book.
+        </p>
 
-      <div class="buy-book-layout">
-        <!-- Dummy cover box -->
-        <div class="buy-book-cover">
-          <div class="buy-book-cover-placeholder">
-            Cover preview
+        <div class="buy-book-layout">
+          <!-- Dummy cover box -->
+          <div class="buy-book-cover">
+            <div class="buy-book-cover-placeholder">
+              Cover preview
+            </div>
+            <p class="muted-copy" data-book-title></p>
+            <p class="muted-copy" data-book-genre></p>
           </div>
-          <p class="muted-copy" data-book-title></p>
-          <p class="muted-copy" data-book-genre></p>
+
+          <!-- Form -->
+          <form class="buy-book-form" id="buy-book-form">
+            <h2>Shipping details</h2>
+
+            <div class="field">
+              <label class="field-label" for="full-name">Full name</label>
+              <input id="full-name" name="fullName" class="text-input" type="text" required />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="email">Email</label>
+              <input id="email" name="email" class="text-input" type="email" required />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="phone">Contact number</label>
+              <input id="phone" name="phone" class="text-input" type="tel" required />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="address-line1">Address line 1</label>
+              <input id="address-line1" name="addressLine1" class="text-input" type="text" required />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="address-line2">Address line 2 (optional)</label>
+              <input id="address-line2" name="addressLine2" class="text-input" type="text" />
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label class="field-label" for="city">City</label>
+                <input id="city" name="city" class="text-input" type="text" required />
+              </div>
+              <div class="field">
+                <label class="field-label" for="province">Province</label>
+                <input id="province" name="province" class="text-input" type="text" required />
+              </div>
+            </div>
+
+            <div class="field-grid">
+              <div class="field">
+                <label class="field-label" for="postal">Postal code</label>
+                <input id="postal" name="postal" class="text-input" type="text" required />
+              </div>
+              <div class="field">
+                <label class="field-label" for="country">Country</label>
+                <input id="country" name="country" class="text-input" type="text" value="Philippines" required />
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">How would you like to receive the book?</label>
+              <div class="radio-row">
+                <label>
+                  <input type="radio" name="deliveryOption" value="delivery" checked />
+                  Deliver to my address
+                </label>
+                <label>
+                  <input type="radio" name="deliveryOption" value="pickup" />
+                  I’ll pick it up from the nearest store
+                </label>
+              </div>
+            </div>
+
+            <div class="field" data-pickup-note hidden>
+              <p class="muted-copy">
+                When you choose in‑store pickup, staff from your selected branch will contact you with stock and pickup details.
+              </p>
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="notes">Additional notes (optional)</label>
+              <textarea id="notes" name="notes" class="text-input" rows="3"></textarea>
+            </div>
+
+            <div class="buy-book-actions">
+              <button type="submit" class="primary-button">Place request</button>
+              <a href="library.html" class="ghost-button">Back to library</a>
+            </div>
+
+            <p class="feedback-strip" id="buy-book-feedback" data-state="info"></p>
+          </form>
         </div>
-
-        <!-- Form -->
-        <form class="buy-book-form" id="buy-book-form">
-          <h2>Shipping details</h2>
-
-          <div class="field">
-            <label class="field-label" for="full-name">Full name</label>
-            <input id="full-name" name="fullName" class="text-input" type="text" required />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="email">Email</label>
-            <input id="email" name="email" class="text-input" type="email" required />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="phone">Contact number</label>
-            <input id="phone" name="phone" class="text-input" type="tel" required />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="address-line1">Address line 1</label>
-            <input id="address-line1" name="addressLine1" class="text-input" type="text" required />
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="address-line2">Address line 2 (optional)</label>
-            <input id="address-line2" name="addressLine2" class="text-input" type="text" />
-          </div>
-
-          <div class="field-grid">
-            <div class="field">
-              <label class="field-label" for="city">City</label>
-              <input id="city" name="city" class="text-input" type="text" required />
-            </div>
-            <div class="field">
-              <label class="field-label" for="province">Province</label>
-              <input id="province" name="province" class="text-input" type="text" required />
-            </div>
-          </div>
-
-          <div class="field-grid">
-            <div class="field">
-              <label class="field-label" for="postal">Postal code</label>
-              <input id="postal" name="postal" class="text-input" type="text" required />
-            </div>
-            <div class="field">
-              <label class="field-label" for="country">Country</label>
-              <input id="country" name="country" class="text-input" type="text" value="Philippines" required />
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="field-label">How would you like to receive the book?</label>
-            <div class="radio-row">
-              <label>
-                <input type="radio" name="deliveryOption" value="delivery" checked />
-                Deliver to my address
-              </label>
-              <label>
-                <input type="radio" name="deliveryOption" value="pickup" />
-                I’ll pick it up from the nearest store
-              </label>
-            </div>
-          </div>
-
-          <div class="field" data-pickup-note hidden>
-            <p class="muted-copy">
-              When you choose in‑store pickup, staff from your selected branch will contact you with stock and pickup details.
-            </p>
-          </div>
-
-          <div class="field">
-            <label class="field-label" for="notes">Additional notes (optional)</label>
-            <textarea id="notes" name="notes" class="text-input" rows="3"></textarea>
-          </div>
-
-          <div class="buy-book-actions">
-            <button type="submit" class="primary-button">Place request</button>
-            <a href="library.html" class="ghost-button">Back to library</a>
-          </div>
-
-          <p class="feedback-strip" id="buy-book-feedback" data-state="info"></p>
-        </form>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
   <script src="supabase-client.js" type="module"></script>
   <script src="supabase-data.js" type="module"></script>
