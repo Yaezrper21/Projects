@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBS Digital Shelf - Buy Book</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="buy-book">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">NBS Digital Shelf</a>
+      <nav class="main-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="library.html">Library</a>
+        <a class="nav-link" href="topup.html">Top-Up</a>
+        <a class="nav-link" href="order.html">Order</a>
+        <a class="nav-link" href="buy-book.html">Buy Book</a>
+        <a class="nav-link" href="search.html">Search</a>
+        <a class="nav-link" href="profile.html">Profile</a>
+        <a class="nav-link" href="login.html">Login</a>
+        <a class="nav-link" href="signup.html">Sign Up</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="session-banner panel" data-session-banner></section>
+      
+      <section class="panel">
+        <div class="purchase-box">
+          <p class="panel-title" data-book-title>Complete Book Purchase</p>
+          <p class="feedback-strip" data-feedback></p>
+          
+          <div class="book-purchase-form" data-form>
+            <div>
+              <label class="field-label" for="buyer-name">Full Name</label>
+              <input type="text" id="buyer-name" class="text-input" data-name required>
+            </div>
+            <div>
+              <label class="field-label" for="buyer-address">Shipping Address</label>
+              <textarea id="buyer-address" class="text-input text-area-input" data-address required></textarea>
+            </div>
+            <div>
+              <label class="field-label" for="card-number">Card Number</label>
+              <input type="text" id="card-number" class="text-input" data-card-number placeholder="1234 5678 9012 3456" maxlength="19" required>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div>
+                <label class="field-label" for="expiry">Expiry (MM/YY)</label>
+                <input type="text" id="expiry" class="text-input" data-expiry placeholder="12/25" maxlength="5" required>
+              </div>
+              <div>
+                <label class="field-label" for="cvv">CVV</label>
+                <input type="text" id="cvv" class="text-input" data-cvv placeholder="123" maxlength="4" required>
+              </div>
+            </div>
+            <p class="muted-copy" data-book-details></p>
+            <button class="primary-button full" data-purchase-book>Place Order</button>
+          </div>
+          
+          <button class="ghost-button full" data-back-to-modal>← Back to Book</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="supabase-client.js"></script>
+  <script type="module" src="supabase-data.js"></script>
+
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const bookId = params.get('book');
+      const feedbackEl = document.querySelector('[data-feedback]');
+      const bookTitleEl = document.querySelector('[data-book-title]');
+      const bookDetailsEl = document.querySelector('[data-book-details]');
+      const formEl = document.querySelector('[data-form]');
+      const purchaseBtn = document.querySelector('[data-purchase-book]');
+      const backBtn = document.querySelector('[data-back-to-modal]');
+
+      async function init() {
+        if (!bookId) {
+          setFeedback('No book selected.', 'error');
+          return;
+        }
+        const book = await window.nbsShelfData?.getBookById(bookId);
+        if (!book) {
+          setFeedback('Book not found.', 'error');
+          return;
+        }
+        bookTitleEl.textContent = book.title;
+        bookDetailsEl.textContent = `${book.chapterCount} chapters • ${book.genre}`;
+        
+        // Prefill profile
+        const profile = await window.nbsShelfData?.getCurrentProfile();
+        if (profile) {
+          document.querySelector('[data-name]').value = profile.username;
+          document.querySelector('[data-address]').value = profile.address;
+        }
+      }
+
+      purchaseBtn?.addEventListener('click', async () => {
+        if (!bookId) return;
+        const formData = {
+          name: formEl.querySelector('[data-name]').value,
+          address: formEl.querySelector('[data-address]').value,
+          cardNumber: formEl.querySelector('[data-card-number]').value.replace(/\s/g, ''),
+          expiry: formEl.querySelector('[data-expiry]').value,
+          cvv: formEl.querySelector('[data-cvv]').value
+        };
+        if (!formData.name || !formData.address || formData.cardNumber.length < 13 || !formData.expiry || !formData.cvv) {
+          setFeedback('Please fill all fields correctly.', 'error');
+          return;
+        }
+        purchaseBtn.disabled = true;
+        const result = await window.nbsShelfData?.purchaseBook(bookId, formData);
+        setFeedback(result?.message || 'Order failed.', result?.ok ? 'success' : 'error');
+        purchaseBtn.disabled = false;
+      });
+
+      backBtn?.addEventListener('click', () => {
+        window.history.back();
+      });
+
+      function setFeedback(msg, state) {
+        feedbackEl.textContent = msg;
+        feedbackEl.dataset.state = state;
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
+
