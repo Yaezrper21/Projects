@@ -1,9 +1,9 @@
-// admin.js
 import {
   getAdminDashboardData,
   saveBook,
   saveAnnouncement,
   deleteAnnouncement,
+  deleteBook,
   signOut
 } from "./supabase-data.js";
 
@@ -58,7 +58,7 @@ async function initAdminPage() {
       card.hidden = !isSuperAdmin;
     });
 
-        // Books list
+           // Books list
     if (booksContainer) {
       if (!books.length) {
         booksContainer.innerHTML = `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
@@ -71,12 +71,75 @@ async function initAdminPage() {
               <p class="management-title">${escapeHtml(book.title)}</p>
               <p class="management-meta">${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters</p>
             </div>
-            <button class="ghost-button compact-ghost" type="button" data-admin-edit-book="${book.id}">Edit</button>
+            <div class="management-actions">
+              <button class="ghost-button compact-ghost" type="button" data-admin-edit-book="${book.id}">
+                Edit
+              </button>
+              <button class="ghost-button compact-ghost" type="button" data-admin-delete-book="${book.id}">
+                Delete
+              </button>
+            </div>
           </article>
         `
           )
           .join("");
       }
+
+      // Handle Edit/Delete clicks on books
+      booksContainer.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const editId = target.dataset.adminEditBook;
+        const deleteId = target.dataset.adminDeleteBook;
+
+        // Edit: go to edit-book.html?id=<id>
+        if (editId) {
+          window.location.href = `edit-book.html?id=${editId}`;
+          return;
+        }
+
+        // Delete: call deleteBook and refresh list
+        if (deleteId) {
+          if (!confirm("Are you sure you want to delete this book?")) return;
+
+          try {
+            setFeedback("Deleting book...", "info");
+            await deleteBook(deleteId);
+            setFeedback("Book deleted.", "success");
+
+            const refreshed = await getAdminDashboardData();
+            const refreshedBooks = refreshed.books || [];
+            if (!refreshedBooks.length) {
+              booksContainer.innerHTML = `<div class="empty-shelf">No books yet. Use the form above to create the first one.</div>`;
+            } else {
+              booksContainer.innerHTML = refreshedBooks
+                .map(
+                  (book) => `
+                <article class="management-row">
+                  <div>
+                    <p class="management-title">${escapeHtml(book.title)}</p>
+                    <p class="management-meta">${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters</p>
+                  </div>
+                  <div class="management-actions">
+                    <button class="ghost-button compact-ghost" type="button" data-admin-edit-book="${book.id}">
+                      Edit
+                    </button>
+                    <button class="ghost-button compact-ghost" type="button" data-admin-delete-book="${book.id}">
+                      Delete
+                    </button>
+                  </div>
+                </article>
+              `
+                )
+                .join("");
+            }
+          } catch (error) {
+            console.error(error);
+            setFeedback(error.message || "Unable to delete the book.", "error");
+          }
+        }
+      });
     }
 
     // Handle Edit Book clicks: go to edit-book.html?id=<bookId>
