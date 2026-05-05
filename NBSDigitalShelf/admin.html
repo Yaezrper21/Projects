@@ -4,67 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NBS Digital Shelf - Admin Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap"
-    rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="admin">
   <div class="site-shell">
     <header class="topbar">
       <a class="brand" href="index.html">NBS Digital Shelf</a>
-      <nav class="main-nav">
-  <a class="nav-link active" href="index.html">Home</a>
-  <a class="nav-link" href="library.html">Library</a>
-  <a class="nav-link" href="topup.html">Top-Up</a>
-  <a class="nav-link" href="order.html">Order</a>
-  <a class="nav-link" href="search.html">Search</a>
-  <a class="nav-link" href="profile.html">Profile</a>
-  <a class="nav-link" href="admin.html">Admin Dashboard</a>
-  <a class="nav-link" href="super-admin.html">Super Admin</a>
-  <a class="nav-link" href="login.html">Login</a>
-  <a class="nav-link" href="signup.html">Sign Up</a>
-</nav>
+      <!-- your nav links here -->
     </header>
 
     <main>
-      <section class="session-banner panel" data-session-banner></section>
-
-      <section class="panel dashboard-shell">
-        <div class="dashboard-heading">
-          <div>
-            <p class="panel-title">Admin Dashboard</p>
-            <h1>Manage books, announcements, accounts, and the live shelf.</h1>
-          </div>
-          <button class="ghost-button compact-ghost" type="button" data-logout>Logout</button>
-        </div>
-
-        <section class="stats-grid">
-          <article class="stat-card" data-super-admin-only hidden>
-            <span>Users</span><strong data-stat="users">0</strong>
-          </article>
-          <article class="stat-card" data-super-admin-only hidden>
-            <span>Admin Accounts</span><strong data-stat="admins">0</strong>
-          </article>
-          <article class="stat-card" data-super-admin-only hidden>
-            <span>Super Admins</span><strong data-stat="super-admins">0</strong>
-          </article>
-          <article class="stat-card">
-            <span>Orders</span><strong data-stat="orders">0</strong>
-          </article>
-          <article class="stat-card">
-            <span>Books</span><strong data-stat="books">0</strong>
-          </article>
-          <article class="stat-card">
-            <span>Announcements</span><strong data-stat="announcements">0</strong>
-          </article>
-          <article class="stat-card">
-            <span>Website Views</span><strong data-stat="views">0</strong>
-          </article>
-        </section>
-
+      <section class="panel">
+        <p class="panel-title">Admin Dashboard</p>
         <div class="dashboard-grid">
           <section class="dashboard-card">
             <p class="panel-title">Create Book</p>
