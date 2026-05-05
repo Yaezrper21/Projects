@@ -294,7 +294,6 @@ async function initAdminPage() {
       feedback.textContent = message;
       feedback.dataset.state = "error";
     }
-    // Hard redirect: kick non-admins / logged-out users to login
     window.location.href = "login.html";
   }
 }
