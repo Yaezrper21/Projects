@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBS Digital Shelf - Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="library">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">NBS Digital Shelf</a>
+      <nav class="main-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link active" href="library.html">Library</a>
+        <a class="nav-link" href="topup.html">Top-Up</a>
+        <a class="nav-link" href="order.html">Order</a>
+        <a class="nav-link" href="search.html">Search</a>
+        <a class="nav-link" href="profile.html">Profile</a>
+        <a class="nav-link" href="login.html">Login</a>
+        <a class="nav-link" href="signup.html">Sign Up</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="session-banner panel" data-session-banner></section>
+      <section class="panel">
+        <div class="subnav">
+          <button class="subnav-link active" data-library-tab="genre">Genre</button>
+          <button class="subnav-link" data-library-tab="popular">Most Popular</button>
+          <button class="subnav-link" data-library-tab="trending">Trending</button>
+          <button class="subnav-link" data-library-tab="latest">Latest Release</button>
+        </div>
+
+        <div class="library-view active" id="library-genre">
+          <div data-genre-sections></div>
+        </div>
+
+        <div class="library-view" id="library-popular">
+          <p class="panel-title center">Most Popular</p>
+          <div class="book-grid tall" id="library-popular-grid"></div>
+        </div>
+
+        <div class="library-view" id="library-trending">
+          <p class="panel-title center">Trending (24hrs)</p>
+          <div class="book-grid tall" id="library-trending-grid"></div>
+        </div>
+
+        <div class="library-view" id="library-latest">
+          <p class="panel-title center">Latest Release</p>
+          <div class="book-grid tall" id="library-latest-grid"></div>
+        </div>
+      </section>
+
+      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">Access National Book Store Website</a>
+    </main>
+  </div>
+
+  <script type="module" src="auth.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
