@@ -491,7 +491,7 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-/* --- NEW: scroll-hide/scroll-show topbar behavior --- */
+/* --- scroll-hide/scroll-show topbar behavior --- */
 
 let lastScrollY = window.scrollY;
 let scrollTimeoutId = null;
