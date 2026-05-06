@@ -192,6 +192,8 @@ button {
   gap: 18px;
   padding: 18px;
 }
+
+/* Hero carousel: cover + small text */
 .hero-carousel {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
@@ -253,8 +255,6 @@ button {
 }
 
 .eyebrow，
-.rate-copy,
-.auth-copy,
 .auth-provider,
 .brand-inline {
   margin: 0;
@@ -322,8 +322,9 @@ button {
   min-height: 540px;
 }
 
+/* More uniform card layout */
 .book-card {
-  min-height: 168px;
+  min-height: 240px; /* unified card height */
   padding: 12px;
   border: 1px solid var(--line);
   background:
@@ -367,17 +368,39 @@ button {
   color: var(--red-deep);
 }
 
+/* Tight, clamped text so cards stay similar height */
+.book-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+  flex: 1;
+}
+
+.book-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.book-subtitle {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+
 .book-description {
   margin: 0;
   font-size: 0.76rem;
   line-height: 1.45;
   color: var(--muted);
-}
-
-.book-meta {
-  display: grid;
-  gap: 4px;
-  margin-top: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;  /* max 3 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .book-stats {
@@ -395,16 +418,10 @@ button {
   margin-top: 14px;
 }
 
-.book-title {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.book-subtitle {
-  margin: 0;
-  font-size: 0.74rem;
-  color: var(--muted);
+/* Keep card buttons pinned toward bottom */
+.primary-button.compact {
+  min-width: 120px;
+  margin-top: auto;
 }
 
 .interactive-card {
@@ -495,10 +512,6 @@ button {
   border: 1px solid var(--red-deep);
   background: linear-gradient(180deg, var(--red) 0%, var(--red-deep) 100%);
   color: #ffffff;
-}
-
-.primary-button.compact {
-  min-width: 120px;
 }
 
 .primary-button.full,
