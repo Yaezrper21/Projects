@@ -30,6 +30,7 @@
     <main>
       <section class="session-banner panel" data-session-banner></section>
 
+      <!-- Hero: announcements + carousel in 2 columns -->
       <section class="panel hero-grid">
         <div class="panel inset">
           <p class="panel-title">Announcements</p>
@@ -37,39 +38,48 @@
             <div class="list-line">Loading announcements...</div>
           </div>
         </div>
-        <!-- New hero carousel powered by popular books -->
-        <div class="panel feature-panel">
-  <div class="hero-carousel" data-hero-carousel>
-    <div class="hero-cover" data-hero-cover></div>
-    <div class="hero-caption">
-      <p class="eyebrow">Featured pick</p>
-      <p class="hero-title" data-hero-title>Loading popular book...</p>
-      <p class="hero-meta" data-hero-meta></p>
-      <div class="book-actions-row">
-        <button class="primary-button" type="button" data-hero-open>Open Book</button>
-      </div>
-    </div>
-  </div>
-</div>
 
+        <div class="panel feature-panel">
+          <div class="hero-carousel" data-hero-carousel>
+            <div class="hero-cover" data-hero-cover></div>
+            <div class="hero-caption">
+              <p class="eyebrow">Featured pick</p>
+              <p class="hero-title" data-hero-title>Loading popular book...</p>
+              <p class="hero-meta" data-hero-meta></p>
+              <div class="book-actions-row">
+                <button class="primary-button" type="button" data-hero-open>Open Book</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Each shelf is its own full-width row -->
       <section class="panel shelf-section">
         <p class="panel-title">Most Popular</p>
         <div class="book-row" id="home-popular"></div>
-        <div class="view-more-row"><a class="view-more-link" href="library.html#popular">View More</a></div>
+        <div class="view-more-row">
+          <a class="view-more-link" href="library.html#popular">View More</a>
+        </div>
       </section>
 
       <section class="panel shelf-section">
         <p class="panel-title">Trending</p>
         <div class="book-row" id="home-trending"></div>
-        <div class="view-more-row"><a class="view-more-link" href="library.html#trending">View More</a></div>
+        <div class="view-more-row">
+          <a class="view-more-link" href="library.html#trending">View More</a>
+        </div>
       </section>
 
       <section class="panel shelf-section">
         <p class="panel-title">Latest Release</p>
         <div class="book-grid" id="home-latest"></div>
-        <div class="view-more-row"><a class="view-more-link" href="library.html#latest">View More</a></div>
+        <div class="view-more-row">
+          <a class="view-more-link" href="library.html#latest">View More</a>
+        </div>
       </section>
 
+      <!-- Access NBS is its own separate row, below all shelves -->
       <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">
         Access National Book Store Website
       </a>
