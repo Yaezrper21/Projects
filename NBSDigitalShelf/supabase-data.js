@@ -325,10 +325,10 @@ export async function trackPageView(pageName) {
 }
 
 export async function incrementBookView(bookId) {
-  const profile = await getCurrentProfile();
+  // Do NOT call getCurrentProfile here; allow anonymous view tracking.
   const { error } = await supabase.from("book_views").insert({
     book_id: bookId,
-    viewer_id: profile?.id || null
+    // no viewer_id (or leave it null if the column exists but is nullable)
   });
 
   throwIfError(error, "Unable to track book view.");
