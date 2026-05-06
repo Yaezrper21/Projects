@@ -422,6 +422,219 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
+
+// ----- modal -----
+
+function ensureBookModal() {
+  if (document.getElementById("book-modal")) return;
+
+  const modal = document.createElement("div");
+  modal.id = "book-modal";
+  modal.className = "modal-shell";
+  modal.hidden = true;
+  modal.innerHTML = `
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-panel">
+      <button class="modal-close" type="button" data-close-modal>Close</button>
+      <div data-modal-content></div>
+    </div>
+  `;
+
+  modal.querySelectorAll("[data-close-modal]").forEach((button) => {
+    button.addEventListener("click", () => closeBookModal());
+  });
+
+  document.body.appendChild(modal);
+}
+
+function closeBookModal() {
+  const modal = document.getElementById("book-modal");
+  if (!modal) return;
+  modal.hidden = true;
+}
+
+async function openBookModal(bookId, trackView = true, flashMessage = "", flashState = "info") {
+  ensureBookModal();
+  const modal = document.getElementById("book-modal");
+  const content = modal?.querySelector("[data-modal-content]");
+  if (!modal || !content) return;
+
+  if (trackView) {
+    await window.nbsShelfData?.incrementBookView(bookId);
+  }
+  const book = await window.nbsShelfData?.getBookById(bookId);
+  const currentUser = await window.nbsShelfData?.getCurrentUser();
+  if (!book) return;
+
+  const genreLabel = getGenreLabel(book.genre);
+
+  modal.hidden = false;
+  content.innerHTML = `
+    <section class="book-detail">
+      <div class="book-detail-hero">
+        <div class="book-detail-cover">
+          ${
+            book.imageDataUrl
+              ? `<img class="book-cover-image" src="${book.imageDataUrl}" alt="${escapeHtml(book.title)} cover">`
+              : `<div class="book-cover-fallback">${escapeHtml(buildInitials(book.title))}</div>`
+          }
+        </div>
+        <div class="book-detail-copy">
+          <p class="panel-title">${escapeHtml(genreLabel)}</p>
+          <h2>${escapeHtml(book.title)}</h2>
+          <p class="feature-text">${escapeHtml(book.description)}</p>
+          <div class="book-stats wide">
+            <span>${Number(book.totalViews || 0)} overall views</span>
+            <span>${Number(book.todayViews || 0)} views today</span>
+            <span>${(book.chapters || []).length} total chapters</span>
+          </div>
+          <div class="book-actions-row">
+            <button class="primary-button" type="button" data-book-buy-chapters>Buy Chapters</button>
+            <button class="ghost-button" type="button" data-book-buy-book>Buy Book</button>
+          </div>
+          <p class="muted-copy align-left">${
+            currentUser
+              ? `Signed in as ${escapeHtml(currentUser.username)}.`
+              : "Guest mode: paid chapters require an account and purchase."
+          }</p>
+        </div>
+      </div>
+      <div class="chapter-reader-list" data-modal-chapters></div>
+      <p class="feedback-strip align-left" data-modal-feedback></p>
+    </section>
+  `;
+
+  const chapterList = content.querySelector("[data-modal-chapters]");
+  const feedback = content.querySelector("[data-modal-feedback]");
+  const buyChaptersButton = content.querySelector("[data-book-buy-chapters]");
+  const buyBookButton = content.querySelector("[data-book-buy-book]");
+
+  if (!chapterList) return;
+  if (flashMessage) {
+    setModalFeedback(feedback, flashMessage, flashState);
+  }
+
+  // Buy Chapters: just guide user to chapter list
+  if (buyChaptersButton) {
+    buyChaptersButton.addEventListener("click", () => {
+      chapterList.scrollIntoView({ behavior: "smooth", block: "start" });
+      setModalFeedback(feedback, "Scroll down and choose which chapter to buy.", "info");
+    });
+  }
+
+  // Buy Book: go to physical purchase page
+  if (buyBookButton) {
+    buyBookButton.addEventListener("click", () => {
+      const url = `buy-book.html?book=${encodeURIComponent(book.id)}`;
+      window.location.href = url;
+    });
+  }
+
+  if (!(book.chapters || []).length) {
+    chapterList.innerHTML = `<div class="empty-shelf">No chapters published yet for this book.</div>`;
+  } else {
+    for (const [index, chapter] of (book.chapters || []).entries()) {
+      const access = await window.nbsShelfData?.getChapterAccess(book.id, chapter.id);
+      const canRead = Boolean(access?.canRead);
+      const requiresPurchase = Boolean(access?.requiresPurchase);
+      const isGuest = Boolean(access?.isGuest);
+
+      let actionsHtml = "";
+
+      // Guests: force account creation for anything that needs auth
+      if (isGuest && (chapter.isPaid || requiresPurchase || canRead)) {
+        actionsHtml = `
+          <button
+            class="primary-button inline"
+            type="button"
+            data-require-signup="true"
+          >
+            Create Account to ${chapter.isPaid ? "Buy/Read" : "Read"}
+          </button>
+        `;
+      } else {
+        actionsHtml = `
+          ${
+            canRead
+              ? `<button class="ghost-button inline" type="button" data-read-chapter="${chapter.id}">Read</button>`
+              : ""
+          }
+          ${
+            requiresPurchase
+              ? `<button class="primary-button inline" type="button" data-buy-chapter="${chapter.id}">Buy Chapter</button>`
+              : ""
+          }
+        `;
+      }
+
+      const article = document.createElement("article");
+      article.className = "chapter-card";
+      article.innerHTML = `
+        <div class="chapter-card-top">
+          <div>
+            <p class="chapter-title">Chapter ${index + 1}: ${escapeHtml(chapter.title)}</p>
+            <p class="chapter-meta">${chapter.isPaid ? "Buyable chapter" : "Free chapter"}</p>
+          </div>
+          <div class="chapter-actions">
+            ${actionsHtml}
+          </div>
+        </div>
+      `;
+      chapterList.appendChild(article);
+    }
+
+    chapterList.querySelectorAll("[data-read-chapter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const chapterId = button.dataset.readChapter;
+        if (!chapterId) return;
+        window.location.href = `chapter-reader.html?book=${encodeURIComponent(
+          book.id
+        )}&chapter=${encodeURIComponent(chapterId)}`;
+      });
+    });
+
+    chapterList.querySelectorAll("[data-buy-chapter]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const result = await window.nbsShelfData?.purchaseChapter(
+          book.id,
+          String(button.dataset.buyChapter || "")
+        );
+        setModalFeedback(
+          feedback,
+          result?.message || "Unable to complete purchase.",
+          result?.ok ? "success" : "error"
+        );
+        if (result?.ok) {
+          await rerenderAfterBookChange(book.id, result.message || "", "success");
+        }
+      });
+    });
+
+    chapterList.querySelectorAll("[data-require-signup]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const params = new URLSearchParams({
+          next: `book-${book.id}`,
+        });
+        window.location.href = `signup.html?${params.toString()}`;
+      });
+    });
+
+    await rerenderShelvesInBackground();
+  }
+}
+
+async function rerenderAfterBookChange(bookId, flashMessage = "", flashState = "info") {
+  await rerenderShelvesInBackground();
+  await openBookModal(bookId, false, flashMessage, flashState);
+}
+
+async function rerenderShelvesInBackground() {
+  const books = await loadBooks();
+  currentBooks = books;
+  renderShelves(books);
+  renderSearchResults(books);
+}
+
 /* --- scroll-hide/scroll-show topbar behavior --- */
 
 let lastScrollY = window.scrollY;
