@@ -119,7 +119,7 @@ button {
   transition: transform 160ms ease, opacity 160ms ease;
 }
 
-/* NEW: hide bar when scrolling down */
+/* Hide bar when scrolling down */
 .topbar.topbar--hidden {
   transform: translateY(-120%);
   opacity: 0;
@@ -219,7 +219,7 @@ button {
   background: var(--panel);
 }
 
-.eyebrow,
+.eyebrow，
 .rate-copy,
 .auth-copy,
 .auth-provider,
