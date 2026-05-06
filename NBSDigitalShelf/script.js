@@ -2,6 +2,10 @@ const libraryButtons = document.querySelectorAll("[data-library-tab]");
 const libraryViews = document.querySelectorAll(".library-view");
 let currentBooks = [];
 
+// Hero carousel state
+let heroCarouselIndex = 0;
+let heroCarouselTimer = null;
+
 document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
 
@@ -100,6 +104,48 @@ function renderShelves(books) {
   fillShelf("library-popular-grid", popular);
   fillShelf("library-trending-grid", trending);
   fillShelf("library-latest-grid", latest);
+
+  // NEW: drive hero carousel on home from popular list
+  initHeroCarousel(popular);
+}
+
+function initHeroCarousel(books) {
+  const shell = document.querySelector("[data-hero-carousel]");
+  const titleEl = document.querySelector("[data-hero-title]");
+  const descEl = document.querySelector("[data-hero-description]");
+  const metaEl = document.querySelector("[data-hero-meta]");
+  const openBtn = document.querySelector("[data-hero-open]");
+
+  // Only run on pages that actually have the hero
+  if (!shell || !books.length) return;
+
+  const slides = books.slice(0, 5); // top 5 popular
+  heroCarouselIndex = 0;
+
+  const showSlide = (index) => {
+    const book = slides[index];
+    if (!book) return;
+
+    titleEl.textContent = book.title;
+    descEl.textContent = truncateText(book.description || "No description yet.", 180);
+    metaEl.textContent = `${book.genre || "Uncategorized"} • ${(book.chapters || []).length} chapters • ${Number(
+      book.totalViews || 0
+    )} views`;
+
+    if (openBtn) {
+      openBtn.onclick = () => {
+        void openBookModal(book.id);
+      };
+    }
+  };
+
+  showSlide(heroCarouselIndex);
+
+  if (heroCarouselTimer) clearInterval(heroCarouselTimer);
+  heroCarouselTimer = setInterval(() => {
+    heroCarouselIndex = (heroCarouselIndex + 1) % slides.length;
+    showSlide(heroCarouselIndex);
+  }, 5000);
 }
 
 function renderGenreSections(books) {
@@ -229,7 +275,9 @@ function renderSearchResults(books) {
         <div class="search-result search-result-book">
           <div>
             <p class="order-name">${escapeHtml(book.title)}</p>
-            <p class="order-meta">${escapeHtml(book.genre)} &middot; ${(book.chapters || []).length} chapters &middot; ${Number(book.todayViews || 0)} today views</p>
+            <p class="order-meta">${escapeHtml(book.genre)} &middot; ${(book.chapters || []).length} chapters &middot; ${Number(
+          book.todayViews || 0
+        )} today views</p>
           </div>
           <button class="primary-button compact" type="button" data-open-book="${book.id}">Open</button>
         </div>
