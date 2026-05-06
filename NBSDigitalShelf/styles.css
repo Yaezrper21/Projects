@@ -152,6 +152,13 @@ button {
   background: transparent;
   font-weight: 700;
 }
+/* Hide auth-dependent nav items by default */
+.nav-link[href="profile.html"],
+.nav-link[href="admin.html"],
+.nav-link[href="super-admin.html"],
+[data-logout] {
+  display: none;
+}
 
 .page {
   display: none;
