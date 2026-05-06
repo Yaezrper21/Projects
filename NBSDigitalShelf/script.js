@@ -356,28 +356,46 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
     chapterList.innerHTML = `<div class="empty-shelf">No chapters published yet for this book.</div>`;
   } else {
     for (const [index, chapter] of (book.chapters || []).entries()) {
-      const access = await window.nbsShelfData?.getChapterAccess(book.id, chapter.id);
-      const canRead = Boolean(access?.canRead);
-      const requiresPurchase = Boolean(access?.requiresPurchase);
-      const isGuest = Boolean(access?.isGuest);
+  const access = await window.nbsShelfData?.getChapterAccess(book.id, chapter.id);
+  const canRead = Boolean(access?.canRead);
+  const requiresPurchase = Boolean(access?.requiresPurchase);
+  const isGuest = Boolean(access?.isGuest);
 
-      const article = document.createElement("article");
-      article.className = "chapter-card";
-      article.innerHTML = `
-        <div class="chapter-card-top">
-          <div>
-            <p class="chapter-title">Chapter ${index + 1}: ${escapeHtml(chapter.title)}</p>
-            <p class="chapter-meta">${chapter.isPaid ? "Buyable chapter" : "Free chapter"}</p>
-          </div>
-          <div class="chapter-actions">
-            ${canRead ? `<button class="ghost-button inline" type="button" data-read-chapter="${chapter.id}">Read</button>` : ""}
-            ${requiresPurchase ? `<button class="primary-button inline" type="button" data-buy-chapter="${chapter.id}">${isGuest ? "Login To Buy" : "Buy Chapter"}</button>` : ""}
-          </div>
-        </div>
-      `;
-      chapterList.appendChild(article);
-    }
+  let actionsHtml = "";
+
+  // Guests: force account creation for anything that needs auth
+  if (isGuest && (chapter.isPaid || requiresPurchase || canRead)) {
+    actionsHtml = `
+      <button
+        class="primary-button inline"
+        type="button"
+        data-require-signup="true"
+      >
+        Create Account to ${chapter.isPaid ? "Buy/Read" : "Read"}
+      </button>
+    `;
+  } else {
+    actionsHtml = `
+      ${canRead ? `<button class="ghost-button inline" type="button" data-read-chapter="${chapter.id}">Read</button>` : ""}
+      ${requiresPurchase ? `<button class="primary-button inline" type="button" data-buy-chapter="${chapter.id}">Buy Chapter</button>` : ""}
+    `;
   }
+
+  const article = document.createElement("article");
+  article.className = "chapter-card";
+  article.innerHTML = `
+    <div class="chapter-card-top">
+      <div>
+        <p class="chapter-title">Chapter ${index + 1}: ${escapeHtml(chapter.title)}</p>
+        <p class="chapter-meta">${chapter.isPaid ? "Buyable chapter" : "Free chapter"}</p>
+      </div>
+      <div class="chapter-actions">
+        ${actionsHtml}
+      </div>
+    </div>
+  `;
+  chapterList.appendChild(article);
+}
 
   chapterList.querySelectorAll("[data-read-chapter]").forEach((button) => {
     button.addEventListener("click", () => {
