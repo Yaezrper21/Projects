@@ -34,7 +34,9 @@ function bindLibraryTabs() {
 }
 
 function setLibraryTab(tabId) {
-  libraryViews.forEach((view) => view.classList.toggle("active", view.id === `library-${tabId}`));
+  libraryViews.forEach((view) =>
+    view.classList.toggle("active", view.id === `library-${tabId}`)
+  );
   libraryButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.libraryTab === tabId);
   });
@@ -43,7 +45,9 @@ function setLibraryTab(tabId) {
 function handleLibraryHash() {
   const hash = window.location.hash.replace("#", "");
   if (!hash) return;
-  const validTabs = Array.from(libraryButtons).map((button) => button.dataset.libraryTab);
+  const validTabs = Array.from(libraryButtons).map(
+    (button) => button.dataset.libraryTab
+  );
   if (validTabs.includes(hash)) {
     setLibraryTab(hash);
   }
@@ -92,9 +96,15 @@ function renderAnnouncements(items) {
 }
 
 function renderShelves(books) {
-  const popular = [...books].sort((a, b) => Number(b.totalViews || 0) - Number(a.totalViews || 0));
-  const trending = [...books].sort((a, b) => Number(b.todayViews || 0) - Number(a.todayViews || 0));
-  const latest = [...books].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  const popular = [...books].sort(
+    (a, b) => Number(b.totalViews || 0) - Number(a.totalViews || 0)
+  );
+  const trending = [...books].sort(
+    (a, b) => Number(b.todayViews || 0) - Number(a.todayViews || 0)
+  );
+  const latest = [...books].sort(
+    (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+  );
 
   fillShelf("home-popular", popular.slice(0, 5));
   fillShelf("home-trending", trending.slice(0, 5));
@@ -124,7 +134,9 @@ function renderGenreChips(rawGenre) {
   const genres = getGenresArray(rawGenre);
   return `
     <div class="book-genres">
-      ${genres.map((g) => `<span class="genre-chip">${escapeHtml(g)}</span>`).join("")}
+      ${genres
+        .map((g) => `<span class="genre-chip">${escapeHtml(g)}</span>`)
+        .join("")}
     </div>
   `;
 }
@@ -161,7 +173,9 @@ function initHeroCarousel(books) {
         `;
       } else {
         coverEl.innerHTML = `
-          <div class="book-cover-fallback">${escapeHtml(buildInitials(book.title))}</div>
+          <div class="book-cover-fallback">${escapeHtml(
+            buildInitials(book.title)
+          )}</div>
         `;
       }
     }
@@ -173,9 +187,9 @@ function initHeroCarousel(books) {
 
     if (metaEl) {
       const genreLabel = getGenreLabel(book.genre);
-      metaEl.textContent = `${genreLabel} • ${(book.chapters || []).length} chapters • ${Number(
-        book.totalViews || 0
-      )} views`;
+      metaEl.textContent = `${genreLabel} • ${
+        (book.chapters || []).length
+      } chapters • ${Number(book.totalViews || 0)} views`;
     }
 
     if (openBtn) {
@@ -222,14 +236,19 @@ function renderGenreSections(books) {
     return;
   }
 
-  const genres = Array.from(grouped.keys()).sort((a, b) => a.localeCompare(b));
+  const genres = Array.from(grouped.keys()).sort((a, b) =>
+    a.localeCompare(b)
+  );
 
   container.innerHTML = `
     <div class="genre-filter-row">
       <label class="field-label" for="genre-filter">Select genre</label>
       <select id="genre-filter" class="text-input" data-genre-filter>
         ${genres
-          .map((genre, index) => `<option value="${index}">${escapeHtml(genre)}</option>`)
+          .map(
+            (genre, index) =>
+              `<option value="${index}">${escapeHtml(genre)}</option>`
+          )
           .join("")}
       </select>
     </div>
@@ -238,7 +257,10 @@ function renderGenreSections(books) {
 
   const filter = container.querySelector("[data-genre-filter]");
   const selectedGenreIndex = filter ? Number(filter.value) : 0;
-  fillShelf("library-genre-grid", grouped.get(genres[selectedGenreIndex]) || []);
+  fillShelf(
+    "library-genre-grid",
+    grouped.get(genres[selectedGenreIndex]) || []
+  );
 
   if (filter) {
     filter.addEventListener("change", () => {
@@ -247,8 +269,6 @@ function renderGenreSections(books) {
     });
   }
 }
-
-// ----- shelves / cards -----
 
 // ----- shelves / cards -----
 
@@ -276,11 +296,19 @@ function createBookCard(book) {
   const card = document.createElement("article");
   card.className = "book-card interactive-card";
 
-  const chapterCount = Array.isArray(book.chapters) ? book.chapters.length : 0;
-  const buyableCount = (book.chapters || []).filter((chapter) => chapter.isPaid).length;
+  const chapterCount = Array.isArray(book.chapters)
+    ? book.chapters.length
+    : 0;
+  const buyableCount = (book.chapters || []).filter(
+    (chapter) => chapter.isPaid
+  ).length;
   const cover = book.imageDataUrl
-    ? `<img class="book-cover-image" src="${book.imageDataUrl}" alt="${escapeHtml(book.title)} cover">`
-    : `<div class="book-cover-fallback">${escapeHtml(buildInitials(book.title))}</div>`;
+    ? `<img class="book-cover-image" src="${book.imageDataUrl}" alt="${escapeHtml(
+        book.title
+      )} cover">`
+    : `<div class="book-cover-fallback">${escapeHtml(
+        buildInitials(book.title)
+      )}</div>`;
 
   const genreChips = renderGenreChips(book.genre);
 
@@ -290,7 +318,9 @@ function createBookCard(book) {
       <p class="book-title">${escapeHtml(book.title)}</p>
       ${genreChips}
       <p class="book-description">
-        ${escapeHtml(truncateText(book.description || "No description yet.", 120))}
+        ${escapeHtml(
+          truncateText(book.description || "No description yet.", 120)
+        )}
       </p>
       <div class="book-stats">
         <span>${chapterCount} chapters</span>
@@ -334,7 +364,7 @@ function renderSearchResults(books) {
             book.title,
             getGenreLabel(book.genre),
             book.description,
-            ...(book.chapters || []).map((chapter) => chapter.title)
+            ...(book.chapters || []).map((chapter) => chapter.title),
           ]
             .join(" ")
             .toLowerCase()
@@ -343,7 +373,11 @@ function renderSearchResults(books) {
       : currentBooks;
 
     if (!filtered.length) {
-      resultsContainer.innerHTML = `<div class="search-result"><p class="order-name">No books found.</p><p class="order-meta">Try another title, genre, or chapter.</p></div>`;
+      resultsContainer.innerHTML =
+        `<div class="search-result">` +
+        `<p class="order-name">No books found.</p>` +
+        `<p class="order-meta">Try another title, genre, or chapter.</p>` +
+        `</div>`;
       return;
     }
 
@@ -354,29 +388,35 @@ function renderSearchResults(books) {
         <div class="search-result search-result-book">
           <div>
             <p class="order-name">${escapeHtml(book.title)}</p>
-            <p class="order-meta">${escapeHtml(genreLabel)} &middot; ${(book.chapters || []).length} chapters &middot; ${Number(
+            <p class="order-meta">${escapeHtml(
+              genreLabel
+            )} &middot; ${(book.chapters || []).length} chapters &middot; ${Number(
           book.todayViews || 0
         )} today views</p>
           </div>
-          <button class="primary-button compact" type="button" data-open-book="${book.id}">Open</button>
+          <button class="primary-button compact" type="button" data-open-book="${
+            book.id
+          }">Open</button>
         </div>
       `;
       })
       .join("");
 
-    resultsContainer.querySelectorAll("[data-open-book]").forEach((button) => {
-      button.addEventListener("click", async () => {
-        const profile = await window.nbsShelfData?.getCurrentUser();
-        const bookId = Number(button.dataset.openBook);
-        if (!profile) {
-          const params = new URLSearchParams({ next: `book-${bookId}` });
-          window.location.href = `signup.html?${params.toString()}`;
-          return;
-        }
+    resultsContainer
+      .querySelectorAll("[data-open-book]")
+      .forEach((button) => {
+        button.addEventListener("click", async () => {
+          const profile = await window.nbsShelfData?.getCurrentUser();
+          const bookId = Number(button.dataset.openBook);
+          if (!profile) {
+            const params = new URLSearchParams({ next: `book-${bookId}` });
+            window.location.href = `signup.html?${params.toString()}`;
+            return;
+          }
 
-        void openBookModal(bookId);
+          void openBookModal(bookId);
+        });
       });
-    });
   };
 
   if (!searchButton.dataset.bound) {
@@ -391,9 +431,6 @@ function renderSearchResults(books) {
 
   paint("");
 }
-
-// ----- modal -----
-// (keep your existing ensureBookModal / openBookModal / etc.)
 
 // ----- helpers -----
 
@@ -475,8 +512,12 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
         <div class="book-detail-cover">
           ${
             book.imageDataUrl
-              ? `<img class="book-cover-image" src="${book.imageDataUrl}" alt="${escapeHtml(book.title)} cover">`
-              : `<div class="book-cover-fallback">${escapeHtml(buildInitials(book.title))}</div>`
+              ? `<img class="book-cover-image" src="${book.imageDataUrl}" alt="${escapeHtml(
+                  book.title
+                )} cover">`
+              : `<div class="book-cover-fallback">${escapeHtml(
+                  buildInitials(book.title)
+                )}</div>`
           }
         </div>
         <div class="book-detail-copy">
@@ -518,7 +559,11 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
   if (buyChaptersButton) {
     buyChaptersButton.addEventListener("click", () => {
       chapterList.scrollIntoView({ behavior: "smooth", block: "start" });
-      setModalFeedback(feedback, "Scroll down and choose which chapter to buy.", "info");
+      setModalFeedback(
+        feedback,
+        "Scroll down and choose which chapter to buy.",
+        "info"
+      );
     });
   }
 
@@ -531,10 +576,14 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
   }
 
   if (!(book.chapters || []).length) {
-    chapterList.innerHTML = `<div class="empty-shelf">No chapters published yet for this book.</div>`;
+    chapterList.innerHTML =
+      `<div class="empty-shelf">No chapters published yet for this book.</div>`;
   } else {
     for (const [index, chapter] of (book.chapters || []).entries()) {
-      const access = await window.nbsShelfData?.getChapterAccess(book.id, chapter.id);
+      const access = await window.nbsShelfData?.getChapterAccess(
+        book.id,
+        chapter.id
+      );
       const canRead = Boolean(access?.canRead);
       const requiresPurchase = Boolean(access?.requiresPurchase);
       const isGuest = Boolean(access?.isGuest);
@@ -572,8 +621,12 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
       article.innerHTML = `
         <div class="chapter-card-top">
           <div>
-            <p class="chapter-title">Chapter ${index + 1}: ${escapeHtml(chapter.title)}</p>
-            <p class="chapter-meta">${chapter.isPaid ? "Buyable chapter" : "Free chapter"}</p>
+            <p class="chapter-title">Chapter ${index + 1}: ${escapeHtml(
+        chapter.title
+      )}</p>
+            <p class="chapter-meta">${
+              chapter.isPaid ? "Buyable chapter" : "Free chapter"
+            }</p>
           </div>
           <div class="chapter-actions">
             ${actionsHtml}
@@ -605,25 +658,35 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
           result?.ok ? "success" : "error"
         );
         if (result?.ok) {
-          await rerenderAfterBookChange(book.id, result.message || "", "success");
+          await rerenderAfterBookChange(
+            book.id,
+            result.message || "",
+            "success"
+          );
         }
       });
     });
 
-    chapterList.querySelectorAll("[data-require-signup]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const params = new URLSearchParams({
-          next: `book-${book.id}`,
+    chapterList
+      .querySelectorAll("[data-require-signup]")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          const params = new URLSearchParams({
+            next: `book-${book.id}`,
+          });
+          window.location.href = `signup.html?${params.toString()}`;
         });
-        window.location.href = `signup.html?${params.toString()}`;
       });
-    });
 
     await rerenderShelvesInBackground();
   }
 }
 
-async function rerenderAfterBookChange(bookId, flashMessage = "", flashState = "info") {
+async function rerenderAfterBookChange(
+  bookId,
+  flashMessage = "",
+  flashState = "info"
+) {
   await rerenderShelvesInBackground();
   await openBookModal(bookId, false, flashMessage, flashState);
 }
