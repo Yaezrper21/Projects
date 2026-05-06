@@ -3,7 +3,7 @@ import {
   getCurrentProfile,
   signOut,
   signUpWithPassword,
-  signInWithPassword
+  signInWithPassword,
 } from "./supabase-data.js";
 
 async function initAuthUi() {
@@ -23,24 +23,29 @@ async function initAuthUi() {
   const logoutButton = document.querySelector("[data-logout]");
 
   if (profile) {
+    // Hide login/signup for authenticated users
     if (loginLink) loginLink.style.display = "none";
     if (signupLink) signupLink.style.display = "none";
-    if (profileLink) profileLink.style.display = "";
-    if (logoutButton) logoutButton.style.display = "";
 
+    // Explicitly show profile + logout
+    if (profileLink) profileLink.style.display = "inline-flex";
+    if (logoutButton) logoutButton.style.display = "inline-flex";
+
+    // Role-based admin links
     if (profile.role === "super_admin") {
-      if (adminLink) adminLink.style.display = "none";
-      if (superAdminLink) superAdminLink.style.display = "";
+      if (adminLink) adminLink.style.display = "inline-flex";
+      if (superAdminLink) superAdminLink.style.display = "inline-flex";
     } else if (profile.role === "admin") {
-      if (adminLink) adminLink.style.display = "";
+      if (adminLink) adminLink.style.display = "inline-flex";
       if (superAdminLink) superAdminLink.style.display = "none";
     } else {
       if (adminLink) adminLink.style.display = "none";
       if (superAdminLink) superAdminLink.style.display = "none";
     }
   } else {
-    if (loginLink) loginLink.style.display = "";
-    if (signupLink) signupLink.style.display = "";
+    // Guest mode
+    if (loginLink) loginLink.style.display = "inline-flex";
+    if (signupLink) signupLink.style.display = "inline-flex";
     if (profileLink) profileLink.style.display = "none";
     if (logoutButton) logoutButton.style.display = "none";
     if (adminLink) adminLink.style.display = "none";
