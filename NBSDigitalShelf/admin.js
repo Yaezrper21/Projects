@@ -7,6 +7,16 @@ import {
   signOut
 } from "./supabase-data.js";
 
+function getGenreLabel(rawGenre) {
+  const str = String(rawGenre || "").trim();
+  if (!str) return "Uncategorized";
+  return str
+    .split(",")
+    .map((g) => g.trim())
+    .filter((g) => g.length > 0)
+    .join(", ");
+}
+
 async function initAdminPage() {
   const feedback = document.querySelector("[data-admin-feedback]");
   const sessionBanner = document.querySelector("[data-session-banner]");
@@ -55,7 +65,7 @@ async function initAdminPage() {
         setFeedback("Creating book...", "info");
         await saveBook({
           title,
-          genre,
+          genre, // may contain comma-separated genres, e.g. "Action, Fantasy"
           description,
           imageFile: imageFile instanceof File ? imageFile : null
         });
@@ -79,7 +89,7 @@ async function initAdminPage() {
                 <div>
                   <p class="management-title">${escapeHtml(book.title)}</p>
                   <p class="management-meta">
-                    ${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters
+                    ${escapeHtml(getGenreLabel(book.genre))} · ${(book.chapters || []).length} chapters
                   </p>
                 </div>
                 <div class="management-actions">
@@ -148,7 +158,7 @@ async function initAdminPage() {
             <div>
               <p class="management-title">${escapeHtml(book.title)}</p>
               <p class="management-meta">
-                ${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters
+                ${escapeHtml(getGenreLabel(book.genre))} · ${(book.chapters || []).length} chapters
               </p>
             </div>
             <div class="management-actions">
@@ -209,7 +219,7 @@ async function initAdminPage() {
                   <div>
                     <p class="management-title">${escapeHtml(book.title)}</p>
                     <p class="management-meta">
-                      ${escapeHtml(book.genre)} · ${(book.chapters || []).length} chapters
+                      ${escapeHtml(getGenreLabel(book.genre))} · ${(book.chapters || []).length} chapters
                     </p>
                   </div>
                   <div class="management-actions">
