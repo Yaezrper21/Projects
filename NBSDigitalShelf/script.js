@@ -415,6 +415,15 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
     });
   });
 
+    chapterList.querySelectorAll("[data-require-signup]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const params = new URLSearchParams({
+      next: `book-${book.id}`
+    });
+    window.location.href = `signup.html?${params.toString()}`;
+  });
+});
+
   await rerenderShelvesInBackground();
 }
 
