@@ -145,6 +145,17 @@ async function initAdminPage() {
       card.hidden = !isSuperAdmin;
     });
 
+    // Profile card (optional; only if you want to show admin profile)
+    if (profileContainer && currentUser) {
+      profileContainer.innerHTML = `
+        <div class="profile-fields">
+          <p>Username: <span>${escapeHtml(currentUser.username || "")}</span></p>
+          <p>Email: <span>${escapeHtml(currentUser.email || "")}</span></p>
+          <p>Role: <span>${escapeHtml(currentUser.role || "")}</span></p>
+        </div>
+      `;
+    }
+
     // Books list
     if (booksContainer) {
       if (!books.length) {
@@ -251,19 +262,6 @@ async function initAdminPage() {
       });
     }
 
-    // Handle Edit Book clicks: go to edit-book.html?id=<bookId>
-    if (booksContainer) {
-      booksContainer.addEventListener("click", (event) => {
-        const target = event.target;
-        if (!(target instanceof HTMLElement)) return;
-
-        const bookId = target.dataset.adminEditBook;
-        if (!bookId) return;
-
-        window.location.href = `edit-book.html?id=${bookId}`;
-      });
-    }
-
     // Announcement form (create or update)
     if (announcementForm) {
       announcementForm.addEventListener("submit", async (event) => {
@@ -340,7 +338,7 @@ async function initAdminPage() {
       });
     }
 
-    // Edit + Delete announcement buttons
+    // Edit + Delete announcement buttons (works with data-admin-delete-announcement)
     if (announcementsContainer) {
       announcementsContainer.addEventListener("click", async (event) => {
         const target = event.target;
