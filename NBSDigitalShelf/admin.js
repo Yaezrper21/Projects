@@ -145,7 +145,7 @@ async function initAdminPage() {
       card.hidden = !isSuperAdmin;
     });
 
-    // Profile card (optional; only if you want to show admin profile)
+    // Profile card
     if (profileContainer && currentUser) {
       profileContainer.innerHTML = `
         <div class="profile-fields">
@@ -276,7 +276,7 @@ async function initAdminPage() {
 
         try {
           if (currentAnnouncementId) {
-            // Update existing announcement (using direct Supabase call)
+            // Update existing announcement
             setFeedback("Updating announcement...", "info");
             const { error } = await window.supabase
               .from("announcements")
@@ -338,21 +338,21 @@ async function initAdminPage() {
       });
     }
 
-    // Edit + Delete announcement buttons (works with data-admin-delete-announcement)
+    // Edit + Delete announcement buttons (fixed: coerce id to number)
     if (announcementsContainer) {
       announcementsContainer.addEventListener("click", async (event) => {
         const target = event.target;
         if (!(target instanceof HTMLElement)) return;
 
-        const deleteId = target.dataset.adminDeleteAnnouncement;
-        const editId = target.dataset.adminEditAnnouncement;
+        const deleteIdRaw = target.dataset.adminDeleteAnnouncement;
+        const editIdRaw = target.dataset.adminEditAnnouncement;
 
         // Edit: load into form
-        if (editId && announcementForm) {
+        if (editIdRaw && announcementForm) {
           try {
             const data = await getAdminDashboardData();
             const announcement =
-              (data.announcements || []).find((a) => String(a.id) === String(editId));
+              (data.announcements || []).find((a) => String(a.id) === String(editIdRaw));
 
             if (!announcement) {
               setFeedback("Unable to find that announcement.", "error");
@@ -373,7 +373,13 @@ async function initAdminPage() {
         }
 
         // Delete announcement
-        if (!deleteId) return;
+        if (!deleteIdRaw) return;
+
+        const deleteId = Number(deleteIdRaw);
+        if (!Number.isFinite(deleteId)) {
+          setFeedback("Invalid announcement id.", "error");
+          return;
+        }
 
         try {
           setFeedback("Removing announcement...", "info");
