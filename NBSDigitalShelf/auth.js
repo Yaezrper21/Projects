@@ -1,5 +1,10 @@
 // auth.js
-import { getCurrentProfile, signOut } from "./supabase-data.js";
+import {
+  getCurrentProfile,
+  signOut,
+  signUpWithPassword,
+  signInWithPassword
+} from "./supabase-data.js";
 
 async function initAuthUi() {
   let profile = null;
@@ -54,6 +59,66 @@ async function initAuthUi() {
   }
 }
 
+function initSignupForm() {
+  const signupForm = document.querySelector('[data-auth-form="signup"]');
+  const feedback = document.querySelector("[data-auth-feedback]");
+  if (!signupForm) return;
+
+  signupForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(signupForm);
+    const username = (formData.get("username") || "").toString().trim();
+    const email = (formData.get("email") || "").toString().trim();
+    const contactNumber = (formData.get("contactNumber") || "").toString().trim();
+    const address = (formData.get("address") || "").toString().trim();
+    const password = (formData.get("password") || "").toString();
+    const confirmPassword = (formData.get("confirmPassword") || "").toString();
+
+    if (!username || !email || !password) {
+      if (feedback) {
+        feedback.textContent = "Username, email, and password are required.";
+        feedback.dataset.state = "error";
+      }
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      if (feedback) {
+        feedback.textContent = "Passwords do not match.";
+        feedback.dataset.state = "error";
+      }
+      return;
+    }
+
+    try {
+      if (feedback) {
+        feedback.textContent = "Creating your account...";
+        feedback.dataset.state = "info";
+      }
+
+      await signUpWithPassword({ username, email, password, contactNumber, address });
+
+      // Auto-login after signup
+      await signInWithPassword(email, password);
+
+      if (feedback) {
+        feedback.textContent = "Account created. Redirecting...";
+        feedback.dataset.state = "success";
+      }
+
+      window.location.href = "index.html";
+    } catch (error) {
+      console.error("Sign up failed", error);
+      if (feedback) {
+        feedback.textContent = error.message || "Unable to create the account.";
+        feedback.dataset.state = "error";
+      }
+    }
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   void initAuthUi();
+  initSignupForm();
 });
