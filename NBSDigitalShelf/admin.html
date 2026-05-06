@@ -57,6 +57,88 @@
               <input class="text-input" type="text" name="title" placeholder="Announcement text">
               <button class="primary-button" type="submit">Create Announcement</button>
             </form>
+            <!-- This is where admin.js will render Edit/Delete rows -->
+            <div class="management-list" data-admin-announcements></div>
+          </section>
+        </div>
+
+        <section class="dashboard-card">
+          <p class="panel-title">Profile</p>
+          <div data-admin-profile></div>
+        </section>
+
+        <p class="feedback-strip align-left" data-admin-feedback></p>
+      </section>
+
+      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">
+        Access National Book Store Website
+      </a>
+    </main>
+  </div>
+
+  <script type="module" src="auth.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NBS Digital Shelf - Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="admin">
+  <div class="site-shell">
+    <header class="topbar">
+      <a class="brand" href="index.html">NBS Digital Shelf</a>
+      <nav class="main-nav">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="library.html">Library</a>
+        <a class="nav-link" href="topup.html">Top-Up</a>
+        <a class="nav-link" href="order.html">Order</a>
+        <a class="nav-link" href="search.html">Search</a>
+        <a class="nav-link" href="profile.html">Profile</a>
+        <a class="nav-link active" href="admin.html">Admin Dashboard</a>
+        <a class="nav-link" href="super-admin.html">Super Admin</a>
+        <a class="nav-link" href="login.html">Login</a>
+        <a class="nav-link" href="signup.html">Sign Up</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="panel">
+        <p class="panel-title">Admin Dashboard</p>
+
+        <div class="dashboard-grid">
+          <section class="dashboard-card">
+            <p class="panel-title">Create Book</p>
+            <form class="dashboard-form wide-form" data-admin-form="book">
+              <input class="text-input" type="text" name="title" placeholder="Book title">
+              <input class="text-input" type="text" name="genre" placeholder="Genre">
+              <textarea class="text-input text-area-input" name="description" placeholder="Description"></textarea>
+
+              <div class="image-picker">
+                <div class="image-picker-preview" data-image-preview>
+                  <div class="image-picker-fallback">BK</div>
+                </div>
+                <label class="image-picker-label">
+                  <span data-image-label>Select cover picture</span>
+                  <input class="image-picker-input" type="file" name="image" accept="image/*" data-image-input>
+                </label>
+              </div>
+
+              <button class="primary-button" type="submit">Create Book</button>
+            </form>
+            <div class="management-list" data-admin-books></div>
+          </section>
+
+          <section class="dashboard-card">
+            <p class="panel-title">Announcements</p>
+            <form class="dashboard-form wide-form" data-admin-form="announcement">
+              <input class="text-input" type="text" name="title" placeholder="Announcement text">
+              <button class="primary-button" type="submit">Create Announcement</button>
+            </form>
+            <!-- This is where admin.js will render Edit/Delete rows -->
             <div class="management-list" data-admin-announcements></div>
           </section>
         </div>
