@@ -109,6 +109,33 @@ function renderShelves(books) {
   initHeroCarousel(popular);
 }
 
+// ----- genre helpers -----
+
+function getGenresArray(rawGenre) {
+  const str = String(rawGenre || "").trim();
+  if (!str) return ["Uncategorized"];
+  return str
+    .split(",")
+    .map((g) => g.trim())
+    .filter((g) => g.length > 0);
+}
+
+function renderGenreChips(rawGenre) {
+  const genres = getGenresArray(rawGenre);
+  return `
+    <div class="book-genres">
+      ${genres.map((g) => `<span class="genre-chip">${escapeHtml(g)}</span>`).join("")}
+    </div>
+  `;
+}
+
+function getGenreLabel(rawGenre) {
+  const genres = getGenresArray(rawGenre);
+  return genres.join(", ");
+}
+
+// ----- hero carousel -----
+
 function initHeroCarousel(books) {
   const shell = document.querySelector("[data-hero-carousel]");
   const coverEl = document.querySelector("[data-hero-cover]");
@@ -145,7 +172,8 @@ function initHeroCarousel(books) {
     }
 
     if (metaEl) {
-      metaEl.textContent = `${book.genre || "Uncategorized"} • ${(book.chapters || []).length} chapters • ${Number(
+      const genreLabel = getGenreLabel(book.genre);
+      metaEl.textContent = `${genreLabel} • ${(book.chapters || []).length} chapters • ${Number(
         book.totalViews || 0
       )} views`;
     }
@@ -173,15 +201,20 @@ function initHeroCarousel(books) {
   }, 5000);
 }
 
+// ----- genre sections grid -----
+
 function renderGenreSections(books) {
   const container = document.querySelector("[data-genre-sections]");
   if (!container) return;
 
   const grouped = new Map();
+
   books.forEach((book) => {
-    const genre = book.genre || "Uncategorized";
-    if (!grouped.has(genre)) grouped.set(genre, []);
-    grouped.get(genre).push(book);
+    const genres = getGenresArray(book.genre);
+    genres.forEach((g) => {
+      if (!grouped.has(g)) grouped.set(g, []);
+      grouped.get(g).push(book);
+    });
   });
 
   if (!grouped.size) {
@@ -215,6 +248,8 @@ function renderGenreSections(books) {
   }
 }
 
+// ----- shelves / cards -----
+
 function fillShelf(id, books) {
   const container = document.getElementById(id);
   if (!container) return;
@@ -245,11 +280,13 @@ function createBookCard(book) {
     ? `<img class="book-cover-image" src="${book.imageDataUrl}" alt="${escapeHtml(book.title)} cover">`
     : `<div class="book-cover-fallback">${escapeHtml(buildInitials(book.title))}</div>`;
 
+  const genreChips = renderGenreChips(book.genre);
+
   card.innerHTML = `
     <div class="book-cover">${cover}</div>
     <div class="book-meta">
       <p class="book-title">${escapeHtml(book.title)}</p>
-      <p class="book-subtitle">${escapeHtml(book.genre || "Uncategorized")}</p>
+      ${genreChips}
       <p class="book-description">
         ${escapeHtml(truncateText(book.description || "No description yet.", 120))}
       </p>
@@ -263,7 +300,7 @@ function createBookCard(book) {
       </div>
       <button class="primary-button compact" type="button">Open Book</button>
     </div>
-  `;
+  ";
 
   card.querySelector("button")?.addEventListener("click", async () => {
     const profile = await window.nbsShelfData?.getCurrentUser();
@@ -279,6 +316,8 @@ function createBookCard(book) {
   return card;
 }
 
+// ----- search -----
+
 function renderSearchResults(books) {
   const resultsContainer = document.querySelector("[data-search-results]");
   const searchInput = document.querySelector("[data-search-input]");
@@ -289,7 +328,12 @@ function renderSearchResults(books) {
     const normalized = query.trim().toLowerCase();
     const filtered = normalized
       ? currentBooks.filter((book) =>
-          [book.title, book.genre, book.description, ...(book.chapters || []).map((chapter) => chapter.title)]
+          [
+            book.title,
+            getGenreLabel(book.genre),
+            book.description,
+            ...(book.chapters || []).map((chapter) => chapter.title)
+          ]
             .join(" ")
             .toLowerCase()
             .includes(normalized)
@@ -302,19 +346,20 @@ function renderSearchResults(books) {
     }
 
     resultsContainer.innerHTML = filtered
-      .map(
-        (book) => `
+      .map((book) => {
+        const genreLabel = getGenreLabel(book.genre);
+        return `
         <div class="search-result search-result-book">
           <div>
             <p class="order-name">${escapeHtml(book.title)}</p>
-            <p class="order-meta">${escapeHtml(book.genre)} &middot; ${(book.chapters || []).length} chapters &middot; ${Number(
+            <p class="order-meta">${escapeHtml(genreLabel)} &middot; ${(book.chapters || []).length} chapters &middot; ${Number(
           book.todayViews || 0
         )} today views</p>
           </div>
           <button class="primary-button compact" type="button" data-open-book="${book.id}">Open</button>
         </div>
-      `
-      )
+      `;
+      })
       .join("");
 
     resultsContainer.querySelectorAll("[data-open-book]").forEach((button) => {
@@ -344,6 +389,8 @@ function renderSearchResults(books) {
 
   paint("");
 }
+
+// ----- modal -----
 
 function ensureBookModal() {
   if (document.getElementById("book-modal")) return;
@@ -386,6 +433,8 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
   const currentUser = await window.nbsShelfData?.getCurrentUser();
   if (!book) return;
 
+  const genreLabel = getGenreLabel(book.genre);
+
   modal.hidden = false;
   content.innerHTML = `
     <section class="book-detail">
@@ -398,7 +447,7 @@ async function openBookModal(bookId, trackView = true, flashMessage = "", flashS
           }
         </div>
         <div class="book-detail-copy">
-          <p class="panel-title">${escapeHtml(book.genre)}</p>
+          <p class="panel-title">${escapeHtml(genreLabel)}</p>
           <h2>${escapeHtml(book.title)}</h2>
           <p class="feature-text">${escapeHtml(book.description)}</p>
           <div class="book-stats wide">
