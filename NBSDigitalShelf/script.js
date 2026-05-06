@@ -105,14 +105,14 @@ function renderShelves(books) {
   fillShelf("library-trending-grid", trending);
   fillShelf("library-latest-grid", latest);
 
-  // NEW: drive hero carousel on home from popular list
+  // Drive hero carousel on home from popular list
   initHeroCarousel(popular);
 }
 
 function initHeroCarousel(books) {
   const shell = document.querySelector("[data-hero-carousel]");
+  const coverEl = document.querySelector("[data-hero-cover]");
   const titleEl = document.querySelector("[data-hero-title]");
-  const descEl = document.querySelector("[data-hero-description]");
   const metaEl = document.querySelector("[data-hero-meta]");
   const openBtn = document.querySelector("[data-hero-open]");
 
@@ -126,11 +126,29 @@ function initHeroCarousel(books) {
     const book = slides[index];
     if (!book) return;
 
-    titleEl.textContent = book.title;
-    descEl.textContent = truncateText(book.description || "No description yet.", 180);
-    metaEl.textContent = `${book.genre || "Uncategorized"} • ${(book.chapters || []).length} chapters • ${Number(
-      book.totalViews || 0
-    )} views`;
+    // Cover image or fallback initials
+    if (coverEl) {
+      if (book.imageDataUrl) {
+        coverEl.innerHTML = `
+          <img src="${book.imageDataUrl}" alt="${escapeHtml(book.title)} cover">
+        `;
+      } else {
+        coverEl.innerHTML = `
+          <div class="book-cover-fallback">${escapeHtml(buildInitials(book.title))}</div>
+        `;
+      }
+    }
+
+    // Short title and compact meta (no long description)
+    if (titleEl) {
+      titleEl.textContent = book.title;
+    }
+
+    if (metaEl) {
+      metaEl.textContent = `${book.genre || "Uncategorized"} • ${(book.chapters || []).length} chapters • ${Number(
+        book.totalViews || 0
+      )} views`;
+    }
 
     if (openBtn) {
       openBtn.onclick = async () => {
