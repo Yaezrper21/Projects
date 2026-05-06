@@ -418,6 +418,24 @@ button {
   margin-top: 14px;
 }
 
+.book-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem; /* space between chips */
+}
+
+.genre-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  margin-right: 0.25rem;      /* extra fallback spacing */
+  border-radius: 999px;
+  background-color: var(--chip-bg, #f1f1f1);
+  color: var(--chip-fg, #333);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
 /* Keep card buttons pinned toward bottom */
 .primary-button.compact {
   min-width: 120px;
