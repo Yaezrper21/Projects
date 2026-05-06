@@ -14,23 +14,25 @@
     <header class="topbar">
       <a class="brand" href="index.html">NBS Digital Shelf</a>
       <nav class="main-nav">
-        <a class="nav-link" href="index.html" data-page="home">Home</a>
-        <a class="nav-link" href="library.html" data-page="library">Library</a>
-        <a class="nav-link" href="topup.html" data-page="topup">Top-Up</a>
-        <a class="nav-link" href="order.html" data-page="order">Order</a>
-        <a class="nav-link" href="search.html" data-page="search">Search</a>
-        <a class="nav-link" href="profile.html" data-page="profile">Profile</a>
-        <a class="nav-link" href="admin.html" data-page="admin">Admin Dashboard</a>
-        <a class="nav-link" href="super-admin.html" data-page="super-admin">Super Admin</a>
-        <a class="nav-link" href="login.html" data-page="login">Login</a>
-        <a class="nav-link" href="signup.html" data-page="signup">Sign Up</a>
+        <a class="nav-link" data-page="home" href="index.html">Home</a>
+        <a class="nav-link" data-page="library" href="library.html">Library</a>
+        <a class="nav-link" data-page="topup" href="topup.html">Top-Up</a>
+        <a class="nav-link" data-page="order" href="order.html">Order</a>
+        <a class="nav-link" data-page="search" href="search.html">Search</a>
+        <a class="nav-link" data-page="profile" href="profile.html">Profile</a>
+        <a class="nav-link" data-page="admin" href="admin.html">Admin Dashboard</a>
+        <a class="nav-link" data-page="super-admin" href="super-admin.html">Super Admin</a>
+        <a class="nav-link" data-page="login" href="login.html">Login</a>
+        <a class="nav-link" data-page="signup" href="signup.html">Sign Up</a>
       </nav>
     </header>
 
     <main>
       <section class="session-banner panel" data-session-banner></section>
+
       <section class="panel">
         <p class="panel-title">Profile</p>
+
         <div class="profile-card">
           <div class="avatar-frame">
             <p class="panel-title">Profile Avatar</p>
@@ -38,6 +40,7 @@
               <span data-profile="initials">NB</span>
             </div>
           </div>
+
           <div class="profile-fields">
             <p>Username: <span data-profile="username"></span></p>
             <p>Email Address: <span data-profile="email"></span></p>
@@ -46,12 +49,17 @@
             <p>Contact Number: <span data-profile="contact"></span></p>
             <p>Address: <span data-profile="address"></span></p>
           </div>
+
           <button class="primary-button full" type="button" data-logout>Logout</button>
         </div>
       </section>
-      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">Access National Book Store Website</a>
+
+      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">
+        Access National Book Store Website
+      </a>
     </main>
   </div>
+
   <script type="module" src="script.js"></script>
   <script type="module" src="auth.js"></script>
 </body>
