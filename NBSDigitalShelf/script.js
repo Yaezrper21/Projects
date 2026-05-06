@@ -133,7 +133,14 @@ function initHeroCarousel(books) {
     )} views`;
 
     if (openBtn) {
-      openBtn.onclick = () => {
+      openBtn.onclick = async () => {
+        const profile = await window.nbsShelfData?.getCurrentUser();
+        if (!profile) {
+          const params = new URLSearchParams({ next: `book-${book.id}` });
+          window.location.href = `signup.html?${params.toString()}`;
+          return;
+        }
+
         void openBookModal(book.id);
       };
     }
@@ -240,7 +247,14 @@ function createBookCard(book) {
     </div>
   `;
 
-  card.querySelector("button")?.addEventListener("click", () => {
+  card.querySelector("button")?.addEventListener("click", async () => {
+    const profile = await window.nbsShelfData?.getCurrentUser();
+    if (!profile) {
+      const params = new URLSearchParams({ next: `book-${book.id}` });
+      window.location.href = `signup.html?${params.toString()}`;
+      return;
+    }
+
     void openBookModal(book.id);
   });
 
@@ -286,8 +300,16 @@ function renderSearchResults(books) {
       .join("");
 
     resultsContainer.querySelectorAll("[data-open-book]").forEach((button) => {
-      button.addEventListener("click", () => {
-        void openBookModal(Number(button.dataset.openBook));
+      button.addEventListener("click", async () => {
+        const profile = await window.nbsShelfData?.getCurrentUser();
+        const bookId = Number(button.dataset.openBook);
+        if (!profile) {
+          const params = new URLSearchParams({ next: `book-${bookId}` });
+          window.location.href = `signup.html?${params.toString()}`;
+          return;
+        }
+
+        void openBookModal(bookId);
       });
     });
   };
