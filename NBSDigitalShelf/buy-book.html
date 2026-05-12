@@ -128,49 +128,81 @@
   </div>
 
   <script src="supabase-client.js" type="module"></script>
-  <script src="supabase-data.js" type="module"></script>
-  <script src="script.js" type="module"></script>
-  <script type="module">
-    import { getBooks } from "./supabase-data.js";
+<script src="supabase-data.js" type="module"></script>
+<script src="script.js" type="module"></script>
+<script type="module">
+  import { getBooks, createPhysicalBookOrder } from "./supabase-data.js";
 
-    document.addEventListener("DOMContentLoaded", async () => {
-      const params = new URLSearchParams(window.location.search);
-      const bookId = params.get("book");
-      const titleNode = document.querySelector("[data-book-title]");
-      const genreNode = document.querySelector("[data-book-genre]");
-      const form = document.getElementById("buy-book-form");
-      const feedback = document.getElementById("buy-book-feedback");
-      const pickupNote = document.querySelector("[data-pickup-note]");
+  document.addEventListener("DOMContentLoaded", async () => {
+    const params = new URLSearchParams(window.location.search);
+    const bookId = params.get("book");
+    const titleNode = document.querySelector("[data-book-title]");
+    const genreNode = document.querySelector("[data-book-genre]");
+    const form = document.getElementById("buy-book-form");
+    const feedback = document.getElementById("buy-book-feedback");
+    const pickupNote = document.querySelector("[data-pickup-note]");
 
-      // Toggle pickup note
-      form.querySelectorAll('input[name="deliveryOption"]').forEach((input) => {
-        input.addEventListener("change", () => {
-          const pickup = input.value === "pickup" && input.checked;
-          pickupNote.hidden = !pickup;
-        });
-      });
+    let currentBookTitle = "";
+    let currentBookId = bookId ? Number(bookId) : null;
 
-      if (bookId) {
-        try {
-          const books = await getBooks();
-          const book = books.find((b) => String(b.id) === String(bookId));
-          if (book) {
-            titleNode.textContent = book.title;
-            genreNode.textContent = book.genre;
-          } else {
-            titleNode.textContent = "Unknown book";
-          }
-        } catch {
-          titleNode.textContent = "Book details unavailable";
-        }
-      }
-
-      form.addEventListener("submit", (event) => {
-        event.preventDefault();
-        feedback.textContent = "This is a demo form. Your request has been recorded locally.";
-        feedback.dataset.state = "success";
+    // Toggle pickup note
+    form.querySelectorAll('input[name="deliveryOption"]').forEach((input) => {
+      input.addEventListener("change", () => {
+        const pickup = input.value === "pickup" && input.checked;
+        pickupNote.hidden = !pickup;
       });
     });
-  </script>
+
+    // Load book info
+    if (bookId) {
+      try {
+        const books = await getBooks();
+        const book = books.find((b) => String(b.id) === String(bookId));
+        if (book) {
+          currentBookTitle = book.title;
+          currentBookId = book.id;
+          titleNode.textContent = book.title;
+          genreNode.textContent = book.genre;
+        } else {
+          titleNode.textContent = "Unknown book";
+        }
+      } catch {
+        titleNode.textContent = "Book details unavailable";
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      feedback.dataset.state = "info";
+      feedback.textContent = "Submitting your request...";
+
+      const formData = {
+        fullName: form.fullName.value.trim(),
+        email: form.email.value.trim(),
+        phone: form.phone.value.trim(),
+        addressLine1: form.addressLine1.value.trim(),
+        addressLine2: form.addressLine2.value.trim(),
+        city: form.city.value.trim(),
+        province: form.province.value.trim(),
+        postal: form.postal.value.trim(),
+        country: form.country.value.trim(),
+        deliveryOption: form.deliveryOption.value,
+        notes: form.notes.value.trim(),
+        bookTitle: currentBookTitle,
+      };
+
+      try {
+        const message = await createPhysicalBookOrder(currentBookId, formData);
+        feedback.dataset.state = "success";
+        feedback.textContent = message;
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        feedback.dataset.state = "error";
+        feedback.textContent = err.message || "Unable to place your request right now.";
+      }
+    });
+  });
+</script>
 </body>
 </html>
