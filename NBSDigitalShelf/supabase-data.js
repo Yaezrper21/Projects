@@ -328,7 +328,6 @@ export async function incrementBookView(bookId) {
   // Do NOT call getCurrentProfile here; allow anonymous view tracking.
   const { error } = await supabase.from("book_views").insert({
     book_id: bookId,
-    // no viewer_id (or leave it null if the column exists but is nullable)
   });
 
   throwIfError(error, "Unable to track book view.");
@@ -435,24 +434,6 @@ export async function createTopupOrder(amount) {
   return `${amount} DigiCoin top-up request saved for ${profile.username}.`;
 }
 
-export async function createTopupOrder(amount) {
-  const profile = await getCurrentProfile();
-  if (!profile) throw new Error("Please log in or sign up before buying DigiCoin.");
-  if (!amount || amount < 1) throw new Error("Enter a valid DigiCoin amount.");
-
-  const { error } = await supabase.from("orders").insert({
-    profile_id: profile.id,
-    item_name: `${amount} DigiCoin Top-Up`,
-    item_type: "topup",
-    status: "Pending",
-    order_number: makeOrderNumber()
-  });
-
-  throwIfError(error, "Unable to save the top-up request.");
-  return `${amount} DigiCoin top-up request saved for ${profile.username}.`;
-}
-
-// ⬇️ PASTE THIS DIRECTLY AFTER createTopupOrder
 export async function createPhysicalBookOrder(bookId, formData) {
   const profile = await getCurrentProfile();
   if (!profile) throw new Error("Please log in or sign up before requesting a physical copy.");
@@ -479,7 +460,6 @@ export async function createPhysicalBookOrder(bookId, formData) {
     item_type: "book_physical",
     status: "Processing",
     order_number: makeOrderNumber(),
-    // Remove this block if your orders table has no JSON column for extra details
     details: {
       fullName,
       email,
@@ -498,14 +478,21 @@ export async function createPhysicalBookOrder(bookId, formData) {
   throwIfError(error, "Unable to save the physical book request.");
   return `Your request for a physical copy has been placed. We will contact you soon.`;
 }
-// ⬆️ END OF NEW FUNCTION
 
 export async function getOrdersForCurrentUser() {
-  // ...existing code...
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error("Log in to see your purchases and top-up requests.");
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  throwIfError(error, "Unable to load orders.");
   return data || [];
 }
 
-// ⬇️ PASTE THESE TWO FUNCTIONS DIRECTLY AFTER getOrdersForCurrentUser
 export async function getOrdersForAdmin() {
   const profile = await getCurrentProfile();
   if (!profile || !isAdminRole(profile.role)) {
@@ -536,32 +523,6 @@ export async function updateOrderStatus(orderId, nextStatus) {
 
   throwIfError(error, "Unable to update the order status.");
   return data;
-}
-// ⬆️ END OF NEW FUNCTIONS
-  
-
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("profile_id", profile.id)
-    .order("created_at", { ascending: false });
-
-  throwIfError(error, "Unable to load orders.");
-  return data || [];
-}
-
-export async function getOrdersForCurrentUser() {
-  const profile = await getCurrentProfile();
-  if (!profile) throw new Error("Log in to see your purchases and top-up requests.");
-
-  const { data, error } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("profile_id", profile.id)
-    .order("created_at", { ascending: false });
-
-  throwIfError(error, "Unable to load orders.");
-  return data || [];
 }
 
 export async function updateOwnProfile({ username, contactNumber, address }) {
@@ -633,7 +594,6 @@ async function requireAdminOrSuperAdminProfile() {
 }
 
 export async function getAdminDashboardData() {
-  // 1. Get current auth user
   const {
     data: { user },
     error: userError,
@@ -643,7 +603,6 @@ export async function getAdminDashboardData() {
     throw new Error("You must be logged in to access the admin dashboard.");
   }
 
-  // 2. Load profile (only columns that actually exist)
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("id, username, email, role, contact_number, address")
@@ -655,19 +614,17 @@ export async function getAdminDashboardData() {
     throw new Error("Unable to load your profile.");
   }
 
-  // 3. Role guard: allow BOTH admin and super_admin
   if (!isAdminRole(profile.role)) {
     throw new Error("Only admin or super admin can manage books.");
   }
 
-  // 4. Load stats and enriched books
   const [
     { data: usersData, error: usersError },
     { data: ordersData, error: ordersError },
     { data: announcementsData, error: announcementsError },
     { data: pageViewsData, error: pageViewsError },
     { data: accountsData, error: accountsError },
-    books, // enriched books with chapters from getBooks()
+    books,
   ] = await Promise.all([
     supabase.from("profiles").select("id, role"),
     supabase.from("orders").select("id"),
@@ -676,7 +633,7 @@ export async function getAdminDashboardData() {
     supabase.from("profiles").select(
       "id, username, email, role, contact_number, address"
     ),
-    getBooks(), // <-- IMPORTANT: use mapped books (includes chapters[])
+    getBooks(),
   ]);
 
   if (usersError) console.error("Error loading users", usersError);
@@ -948,7 +905,6 @@ export async function waitForSessionAfterRedirect(retries = 12) {
   return null;
 }
 
-// Export all functions to window.nbsShelfData for use in script.js
 if (typeof window !== "undefined") {
   window.nbsShelfData = {
     getBooks,
@@ -981,6 +937,7 @@ if (typeof window !== "undefined") {
     getSession,
     trackPageView,
     createTopupOrder,
+    createPhysicalBookOrder,
     waitForSessionAfterRedirect
   };
 }
