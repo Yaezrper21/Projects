@@ -435,6 +435,121 @@ export async function createTopupOrder(amount) {
   return `${amount} DigiCoin top-up request saved for ${profile.username}.`;
 }
 
+export async function createTopupOrder(amount) {
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error("Please log in or sign up before buying DigiCoin.");
+  if (!amount || amount < 1) throw new Error("Enter a valid DigiCoin amount.");
+
+  const { error } = await supabase.from("orders").insert({
+    profile_id: profile.id,
+    item_name: `${amount} DigiCoin Top-Up`,
+    item_type: "topup",
+    status: "Pending",
+    order_number: makeOrderNumber()
+  });
+
+  throwIfError(error, "Unable to save the top-up request.");
+  return `${amount} DigiCoin top-up request saved for ${profile.username}.`;
+}
+
+// ⬇️ PASTE THIS DIRECTLY AFTER createTopupOrder
+export async function createPhysicalBookOrder(bookId, formData) {
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error("Please log in or sign up before requesting a physical copy.");
+
+  const {
+    fullName,
+    email,
+    phone,
+    addressLine1,
+    addressLine2,
+    city,
+    province,
+    postal,
+    country,
+    deliveryOption,
+    notes,
+  } = formData;
+
+  const { error } = await supabase.from("orders").insert({
+    profile_id: profile.id,
+    book_id: bookId || null,
+    chapter_id: null,
+    item_name: `Physical copy request for ${formData.bookTitle || "a book"}`,
+    item_type: "book_physical",
+    status: "Processing",
+    order_number: makeOrderNumber(),
+    // Remove this block if your orders table has no JSON column for extra details
+    details: {
+      fullName,
+      email,
+      phone,
+      addressLine1,
+      addressLine2,
+      city,
+      province,
+      postal,
+      country,
+      deliveryOption,
+      notes,
+    },
+  });
+
+  throwIfError(error, "Unable to save the physical book request.");
+  return `Your request for a physical copy has been placed. We will contact you soon.`;
+}
+// ⬆️ END OF NEW FUNCTION
+
+export async function getOrdersForCurrentUser() {
+  // ...existing code...
+  return data || [];
+}
+
+// ⬇️ PASTE THESE TWO FUNCTIONS DIRECTLY AFTER getOrdersForCurrentUser
+export async function getOrdersForAdmin() {
+  const profile = await getCurrentProfile();
+  if (!profile || !isAdminRole(profile.role)) {
+    throw new Error("Admin access is required to see all book orders.");
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  throwIfError(error, "Unable to load orders.");
+  return data || [];
+}
+
+export async function updateOrderStatus(orderId, nextStatus) {
+  const profile = await getCurrentProfile();
+  if (!profile || !isAdminRole(profile.role)) {
+    throw new Error("Admin access is required to update orders.");
+  }
+
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ status: nextStatus })
+    .eq("id", orderId)
+    .select("*")
+    .single();
+
+  throwIfError(error, "Unable to update the order status.");
+  return data;
+}
+// ⬆️ END OF NEW FUNCTIONS
+  
+
+  const { data, error } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("profile_id", profile.id)
+    .order("created_at", { ascending: false });
+
+  throwIfError(error, "Unable to load orders.");
+  return data || [];
+}
+
 export async function getOrdersForCurrentUser() {
   const profile = await getCurrentProfile();
   if (!profile) throw new Error("Log in to see your purchases and top-up requests.");
