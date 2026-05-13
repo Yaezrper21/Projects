@@ -5,6 +5,18 @@ import {
 } from "./supabase-data.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  // highlight current nav item (same pattern as script.js)
+  const page = document.body.dataset.page;
+  const navLinks = Array.from(document.querySelectorAll(".nav-link"));
+  navLinks.forEach((link) => {
+    const linkPage = link.dataset.page;
+    if (linkPage === page) {
+      link.classList.add("nav-active");
+    } else {
+      link.classList.remove("nav-active");
+    }
+  });
+
   void initProfilePage();
 });
 
