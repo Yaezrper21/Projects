@@ -6,7 +6,8 @@ let currentBooks = [];
 let heroCarouselIndex = 0;
 let heroCarouselTimer = null;
 
-document.addEventListener("DOMContentLoaded", () => {
+  // Highlight current navigation item
+ document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
 
   // Highlight current navigation item
@@ -24,6 +25,10 @@ document.addEventListener("DOMContentLoaded", () => {
     bindLibraryTabs();
     handleLibraryHash();
     void renderDynamicContent();
+  }
+
+  if (page === "orders") {
+    void initOrdersPage();
   }
 });
 
@@ -430,6 +435,81 @@ function renderSearchResults(books) {
   }
 
   paint("");
+}
+
+// ----- orders page -----
+
+async function initOrdersPage() {
+  const list = document.querySelector("[data-order-list]");
+  const subnav = document.querySelector("[data-order-subnav]");
+  if (!list || !subnav) return;
+
+  // Load all orders for the current user
+  const orders = await window.nbsShelfData?.getOrdersForCurrentUser?.();
+  if (!Array.isArray(orders)) {
+    list.innerHTML = `<div class="empty-shelf">No orders yet.</div>`;
+    return;
+  }
+
+  // Default view: processing
+  renderOrdersTab(list, orders, "processing");
+
+  subnav.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const tab = target.dataset.orderFilter;
+    if (!tab) return;
+
+    // Update active pill
+    subnav.querySelectorAll("[data-order-filter]").forEach((btn) => {
+      btn.classList.toggle("is-active", btn === target);
+    });
+
+    renderOrdersTab(list, orders, tab);
+  });
+}
+
+function renderOrdersTab(list, allOrders, tab) {
+  let filtered = [];
+
+  if (tab === "processing") {
+    // treat Pending as Processing
+    filtered = allOrders.filter((o) => o.status === "Pending");
+  } else if (tab === "ebook") {
+    // digital purchases (chapters)
+    filtered = allOrders.filter((o) => o.item_type === "chapter");
+  } else if (tab === "books") {
+    // physical book requests
+    filtered = allOrders.filter((o) => o.item_type === "book");
+  }
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-shelf">No orders in this category yet.</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered
+    .map((order) => {
+      const name = order.item_name || "Order";
+      const status = order.status || "";
+      const number = order.order_number || "";
+      const created = order.created_at
+        ? new Date(order.created_at).toLocaleString()
+        : "";
+      return `
+        <div class="order-row">
+          <div>
+            <p class="order-name">${escapeHtml(name)}</p>
+            <p class="order-meta">
+              ${escapeHtml(status)} · ${escapeHtml(number)}${
+        created ? " · " + escapeHtml(created) : ""
+      }
+            </p>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
 }
 
 // ----- helpers -----
