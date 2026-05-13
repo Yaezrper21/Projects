@@ -1,7 +1,7 @@
 import {
-  getCurrentProfile,
-  updateProfileDetails,
-  updateProfileAvatar,
+  getCurrentUser,
+  updateOwnProfile,
+  uploadProfileAvatar,
 } from "./supabase-data.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -9,100 +9,98 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function initProfilePage() {
-  const feedback = document.querySelector("[data-profile-feedback]");
+  const feedbackEl = document.querySelector("[data-profile-feedback]");
+  const avatarImg = document.querySelector("[data-profile-avatar]");
   const form = document.querySelector("[data-profile-form]");
   const avatarForm = document.querySelector("[data-profile-avatar-form]");
-  const avatarImg = document.querySelector("[data-profile-avatar]");
-  const avatarFallback = document.querySelector("[data-profile-avatar-fallback]");
 
-  function setFeedback(message, state = "info") {
-    if (!feedback) return;
-    feedback.textContent = message;
-    feedback.dataset.state = state;
+  function setFeedback(msg, state = "info") {
+    if (!feedbackEl) return;
+    feedbackEl.textContent = msg;
+    feedbackEl.dataset.state = state;
   }
 
   try {
     setFeedback("Loading profile...", "info");
-    const profile = await getCurrentProfile();
+    const profile = await getCurrentUser(true); // force refresh from DB
     if (!profile) {
-      setFeedback("You must be logged in to view your profile.", "error");
+      setFeedback("Please log in to view your profile.", "error");
       return;
     }
 
-    // Prefill fields
-    if (form) {
-      form.username.value = profile.username || "";
-      form.email.value = profile.email || "";
-      form.contactNumber.value = profile.contactNumber || "";
-      form.address.value = profile.address || "";
+    // Fill fields
+    document.querySelector("[data-profile-username]").value =
+      profile.username || "";
+    document.querySelector("[data-profile-email]").value =
+      profile.email || "";
+    document.querySelector("[data-profile-contact]").value =
+      profile.contactNumber || "";
+    document.querySelector("[data-profile-address]").value =
+      profile.address || "";
+
+    // Show avatar if exists
+    if (profile.avatarUrl && avatarImg) {
+      avatarImg.src = profile.avatarUrl;
     }
 
-    // Avatar display
-    updateAvatarUi(profile, avatarImg, avatarFallback);
     setFeedback("Profile loaded.", "success");
-  } catch (error) {
-    console.error(error);
-    setFeedback(error.message || "Unable to load profile.", "error");
+  } catch (err) {
+    console.error(err);
+    setFeedback(err.message || "Unable to load profile.", "error");
   }
 
+  // Save text fields
   if (form) {
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const formData = new FormData(form);
-
-      const payload = {
-        username: formData.get("username")?.toString().trim() || "",
-        contactNumber: formData.get("contactNumber")?.toString().trim() || "",
-        address: formData.get("address")?.toString().trim() || "",
-      };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username =
+        document.querySelector("[data-profile-username]").value.trim();
+      const contactNumber =
+        document.querySelector("[data-profile-contact]").value.trim();
+      const address =
+        document.querySelector("[data-profile-address]").value.trim();
 
       try {
-        setFeedback("Saving changes...", "info");
-        const updated = await updateProfileDetails(payload);
-        updateAvatarUi(updated, avatarImg, avatarFallback);
-        setFeedback("Profile updated.", "success");
-      } catch (error) {
-        console.error(error);
-        setFeedback(error.message || "Unable to save profile.", "error");
+        setFeedback("Saving profile...", "info");
+        const updated = await updateOwnProfile({
+          username,
+          contactNumber,
+          address,
+        });
+        if (updated.avatarUrl && avatarImg) {
+          avatarImg.src = updated.avatarUrl;
+        }
+        setFeedback("Profile saved.", "success");
+      } catch (err) {
+        console.error(err);
+        setFeedback(err.message || "Unable to save profile.", "error");
       }
     });
   }
 
+  // Upload avatar
   if (avatarForm) {
-    avatarForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const formData = new FormData(avatarForm);
-      const file = formData.get("avatar");
+    avatarForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = avatarForm.querySelector('input[name="avatar"]');
+      const file = fileInput?.files?.[0];
+
+      if (!file) {
+        setFeedback("Please choose an image file.", "error");
+        return;
+      }
 
       try {
         setFeedback("Uploading avatar...", "info");
-        const updated = await updateProfileAvatar(file);
-        updateAvatarUi(updated, avatarImg, avatarFallback);
+        const updated = await uploadProfileAvatar(file);
+        if (updated.avatarUrl && avatarImg) {
+          avatarImg.src = updated.avatarUrl;
+        }
         setFeedback("Avatar updated.", "success");
-      } catch (error) {
-        console.error(error);
-        setFeedback(error.message || "Unable to update avatar.", "error");
+      } catch (err) {
+        console.error(err);
+        setFeedback(err.message || "Unable to upload avatar.", "error");
       }
     });
-  }
-}
-
-function updateAvatarUi(profile, imgEl, fallbackEl) {
-  if (!imgEl || !fallbackEl) return;
-
-  if (profile.avatarUrl) {
-    imgEl.src = profile.avatarUrl;
-    imgEl.hidden = false;
-    fallbackEl.hidden = true;
-  } else {
-    imgEl.hidden = true;
-    fallbackEl.hidden = false;
-    const initials = (profile.username || profile.email || "NB")
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase() || "")
-      .join("") || "NB";
-    fallbackEl.textContent = initials;
   }
 }
