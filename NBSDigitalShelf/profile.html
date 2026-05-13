@@ -11,9 +11,24 @@
     <header class="topbar">
       <a class="brand" href="index.html">NBS DIGITAL SHELF</a>
       <nav class="main-nav">
+        <!-- Main site nav -->
+        <a class="nav-link" href="index.html" data-page="home">HOME</a>
+        <a class="nav-link" href="library.html" data-page="library">LIBRARY</a>
+        <a class="nav-link" href="my-books.html" data-page="my-books">MY BOOKS</a>
+        <a class="nav-link" href="order.html" data-page="orders">ORDERS</a>
+
+        <!-- Auth-related links (shown/hidden by auth.js) -->
+        <a class="nav-link" href="login.html" data-page="login">LOGIN</a>
+        <a class="nav-link" href="signup.html" data-page="signup">SIGN UP</a>
+        <a class="nav-link" href="profile.html" data-page="profile">PROFILE</a>
+
+        <!-- Admin links (role-based by auth.js) -->
         <a class="nav-link" href="admin.html" data-page="admin">BOOK MANAGEMENT</a>
         <a class="nav-link" href="admin.html#announcements" data-page="announcements">ANNOUNCEMENTS</a>
-        <a class="nav-link" href="profile.html" data-page="profile">PROFILE</a>
+        <a class="nav-link" href="super-admin.html" data-page="super-admin">SUPER ADMIN</a>
+
+        <!-- Logout button (visible when signed in) -->
+        <button class="nav-link" type="button" data-logout>LOGOUT</button>
       </nav>
     </header>
 
