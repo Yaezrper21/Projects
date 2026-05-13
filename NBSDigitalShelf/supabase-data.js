@@ -458,7 +458,7 @@ export async function createPhysicalBookOrder(bookId, formData) {
     chapter_id: null,
     item_name: `Physical copy request for ${formData.bookTitle || "a book"}`,
     item_type: "book",
-    status: "Processing",
+    status: "Pending",
     order_number: makeOrderNumber(),
     details: {
       fullName,
