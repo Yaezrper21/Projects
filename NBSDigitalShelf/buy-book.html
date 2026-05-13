@@ -192,15 +192,15 @@
       };
 
       try {
-        const message = await createPhysicalBookOrder(currentBookId, formData);
-        feedback.dataset.state = "success";
-        feedback.textContent = message;
-        form.reset();
-      } catch (err) {
-        console.error(err);
-        feedback.dataset.state = "error";
-        feedback.textContent = err.message || "Unable to place your request right now.";
-      }
+  const message = await createPhysicalBookOrder(currentBookId, formData);
+  feedback.dataset.state = "success";
+  feedback.textContent = message;
+  form.reset(); 
+} catch (err) {
+  console.error(err);
+  feedback.dataset.state = "error";
+  feedback.textContent = err.message || "Unable to place your request right now.";
+}
     });
   });
 </script>
