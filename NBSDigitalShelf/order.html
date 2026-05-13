@@ -4,12 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NBS Digital Shelf - Order</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
   <link rel="stylesheet" href="styles.css">
 </head>
-<body data-page="order">
+<body data-page="orders">
   <div class="site-shell">
     <header class="topbar">
       <a class="brand" href="index.html">NBS Digital Shelf</a>
@@ -17,7 +21,7 @@
         <a class="nav-link" data-page="home" href="index.html">Home</a>
         <a class="nav-link" data-page="library" href="library.html">Library</a>
         <a class="nav-link" data-page="topup" href="topup.html">Top-Up</a>
-        <a class="nav-link" data-page="order" href="order.html">Order</a>
+        <a class="nav-link" data-page="orders" href="order.html">Order</a>
         <a class="nav-link" data-page="search" href="search.html">Search</a>
         <a class="nav-link" data-page="profile" href="profile.html">Profile</a>
         <a class="nav-link" data-page="admin" href="admin.html">Admin Dashboard</a>
@@ -31,24 +35,30 @@
       <section class="session-banner panel" data-session-banner></section>
 
       <section class="panel">
-  <p class="panel-title">Orders</p>
-  <p class="feedback-strip align-left" data-order-feedback></p>
-  <div class="order-subnav" data-order-subnav>
-    <button class="pill-button is-active" data-order-filter="processing">Processing</button>
-    <button class="pill-button" data-order-filter="ebook">E‑book</button>
-    <button class="pill-button" data-order-filter="books">Books</button>
-  </div>
+        <p class="panel-title">Orders</p>
+        <p class="feedback-strip align-left" data-order-feedback></p>
 
-  <div class="order-list" data-order-list></div>
-</section>
+        <div class="order-subnav" data-order-subnav>
+          <button class="pill-button is-active" data-order-filter="processing">Processing</button>
+          <button class="pill-button" data-order-filter="ebook">E‑book</button>
+          <button class="pill-button" data-order-filter="books">Books</button>
+        </div>
 
-      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">
+        <div class="order-list" data-order-list></div>
+      </section>
+
+      <a
+        class="cta-strip"
+        href="https://www.nationalbookstore.com/"
+        target="_blank"
+        rel="noreferrer"
+      >
         Access National Book Store Website
       </a>
     </main>
   </div>
 
   <script type="module" src="auth.js"></script>
-<script type="module" src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
