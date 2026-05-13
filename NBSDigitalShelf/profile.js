@@ -1,5 +1,5 @@
 import {
-  getCurrentUser,
+  getCurrentProfile,
   updateOwnProfile,
   uploadProfileAvatar,
 } from "./supabase-data.js";
@@ -22,7 +22,7 @@ async function initProfilePage() {
 
   try {
     setFeedback("Loading profile...", "info");
-    const profile = await getCurrentUser(true); // force refresh from DB
+    const profile = await getCurrentProfile(true); // force refresh from DB
     if (!profile) {
       setFeedback("Please log in to view your profile.", "error");
       return;
