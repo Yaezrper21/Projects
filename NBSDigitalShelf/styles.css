@@ -11,6 +11,8 @@
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.06);
 }
 
+/* ORDER SUBNAV / PILLS */
+
 .order-subnav {
   display: flex;
   justify-content: center;   /* center horizontally */
@@ -99,6 +101,8 @@
   font-weight: 700; /* or bold */
 }
 
+/* BUY PHYSICAL BOOK PAGE */
+
 .buy-book-layout {
   display: grid;
   gap: 2rem;
@@ -142,6 +146,8 @@
   flex-wrap: wrap;
 }
 
+/* DARK THEME */
+
 :root[data-theme="dark"] {
   --bg: #0f0f10;
   --panel: #171718;
@@ -154,6 +160,8 @@
   --red-soft: #242428;
   --shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
+
+/* GLOBAL RESET / SHELL */
 
 * {
   box-sizing: border-box;
@@ -184,6 +192,8 @@ button {
   width: calc(100vw - 48px);
   margin: 18px 24px 40px;
 }
+
+/* TOPBAR / NAV */
 
 .topbar {
   position: sticky;
@@ -253,6 +263,8 @@ button {
   display: none;
 }
 
+/* PAGES / PANELS */
+
 .page {
   display: none;
   animation: rise 240ms ease;
@@ -268,6 +280,8 @@ button {
   background: var(--panel);
   box-shadow: var(--shadow);
 }
+
+/* HERO / HOME */
 
 .hero-grid {
   display: grid;
@@ -362,6 +376,8 @@ button {
   line-height: 1.6;
   color: var(--muted);
 }
+
+/* BOOK GRID / CARDS */
 
 .stack-list {
   display: grid;
@@ -544,6 +560,8 @@ button {
   box-shadow: var(--shadow);
 }
 
+/* SESSION BANNER */
+
 .session-banner {
   display: flex;
   justify-content: space-between;
@@ -560,6 +578,8 @@ button {
 .session-banner strong {
   color: var(--red-deep);
 }
+
+/* LIBRARY / SEARCH */
 
 .subnav {
   justify-content: center;
@@ -626,6 +646,8 @@ button {
   background: var(--panel);
 }
 
+/* TRANSACTION / ORDERS */
+
 .transaction-panel {
   min-height: 360px;
   display: grid;
@@ -681,6 +703,8 @@ button {
   font-weight: 700;
 }
 
+/* OLD PROFILE CARD (ADMIN DASHBOARD) */
+
 .profile-card {
   display: grid;
   gap: 14px;
@@ -727,6 +751,8 @@ button {
   font-size: 0.78rem;
   letter-spacing: 0.06em;
 }
+
+/* AUTH PAGES */
 
 .auth-page {
   max-width: 760px;
@@ -809,6 +835,8 @@ button {
 .feedback-strip[data-state="info"] {
   color: var(--muted);
 }
+
+/* DASHBOARD / ADMIN */
 
 .dashboard-shell {
   padding: 18px;
@@ -1022,6 +1050,8 @@ button {
   background: var(--panel);
 }
 
+/* MODAL */
+
 .modal-shell {
   position: fixed;
   inset: 0;
@@ -1059,6 +1089,8 @@ button {
   letter-spacing: 0.08em;
   font-size: 0.72rem;
 }
+
+/* BOOK DETAIL / CHAPTER READER */
 
 .book-detail {
   display: grid;
@@ -1196,6 +1228,125 @@ button {
   max-width: 360px;
 }
 
+/* PROFILE PAGE (USER) – matches wireframe */
+
+.profile-panel {
+  padding: 18px;
+}
+
+.profile-box {
+  border: 1px solid var(--line);
+  padding: 16px;
+  margin-bottom: 16px;
+  background: var(--panel);
+}
+
+.profile-section {
+  border: 1px solid var(--line);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.profile-section-title {
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* Big avatar box like mockup */
+.profile-avatar-frame {
+  border: 1px solid var(--line-strong);
+  min-height: 220px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fdfdfd;
+}
+
+.profile-avatar-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.profile-avatar-form {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Info rows: LABEL: value input */
+.profile-section--info {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-field-row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.profile-label {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.profile-input {
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.profile-input[disabled] {
+  background: #f7f7f7;
+  color: #888888;
+}
+
+.profile-input.profile-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--red-deep);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.profile-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile-nbs-button {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* RESPONSIVE PROFILE LAYOUT */
+
+@media (max-width: 720px) {
+  .profile-field-row {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+}
+
+/* ANIMATIONS */
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -1206,6 +1357,8 @@ button {
     transform: translateY(0);
   }
 }
+
+/* RESPONSIVE BREAKPOINTS */
 
 @media (max-width: 960px) {
   .topbar,
@@ -1281,6 +1434,7 @@ button {
 }
 
 /* Chapter Reader Styles */
+
 .chapter-reader-page {
   display: grid;
   gap: 24px;
