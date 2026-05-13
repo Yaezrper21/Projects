@@ -4,9 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NBS Digital Shelf - Profile</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap"
+    rel="stylesheet"
+  >
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-page="profile">
@@ -17,7 +21,7 @@
         <a class="nav-link" data-page="home" href="index.html">Home</a>
         <a class="nav-link" data-page="library" href="library.html">Library</a>
         <a class="nav-link" data-page="topup" href="topup.html">Top-Up</a>
-        <a class="nav-link" data-page="order" href="order.html">Order</a>
+        <a class="nav-link" data-page="orders" href="order.html">Order</a>
         <a class="nav-link" data-page="search" href="search.html">Search</a>
         <a class="nav-link" data-page="profile" href="profile.html">Profile</a>
         <a class="nav-link" data-page="admin" href="admin.html">Admin Dashboard</a>
@@ -30,37 +34,95 @@
     <main>
       <section class="session-banner panel" data-session-banner></section>
 
-      <section class="panel">
-        <p class="panel-title">Profile</p>
+      <section class="panel profile-panel">
+        <p class="panel-title">My Profile</p>
+        <p class="feedback-strip align-left" data-profile-feedback></p>
 
-        <div class="profile-card">
-          <div class="avatar-frame">
-            <p class="panel-title">Profile Avatar</p>
-            <div class="avatar-placeholder">
-              <span data-profile="initials">NB</span>
+        <div class="profile-layout">
+          <!-- Avatar -->
+          <div class="profile-avatar-block">
+            <div class="profile-avatar-frame">
+              <img
+                src=""
+                alt="Profile avatar"
+                class="profile-avatar-image"
+                data-profile-avatar
+              >
+              <div class="profile-avatar-fallback" data-profile-avatar-fallback>NB</div>
             </div>
+
+            <form data-profile-avatar-form>
+              <label class="field-label" for="avatar">Change avatar</label>
+              <input
+                id="avatar"
+                name="avatar"
+                type="file"
+                accept="image/*"
+                class="file-input"
+              >
+              <button class="primary-button compact" type="submit">
+                Upload Avatar
+              </button>
+            </form>
           </div>
 
-          <div class="profile-fields">
-            <p>Username: <span data-profile="username"></span></p>
-            <p>Email Address: <span data-profile="email"></span></p>
-            <p>Role: <span data-profile="role"></span></p>
-            <p>Sign-In Type: <span data-profile="auth"></span></p>
-            <p>Contact Number: <span data-profile="contact"></span></p>
-            <p>Address: <span data-profile="address"></span></p>
-          </div>
+          <!-- Info / edit form -->
+          <form class="profile-form" data-profile-form>
+            <div class="field-group">
+              <label class="field-label" for="profile-username">Username</label>
+              <input
+                id="profile-username"
+                name="username"
+                type="text"
+                class="text-input"
+                autocomplete="name"
+              >
+            </div>
 
-          <button class="primary-button full" type="button" data-logout>Logout</button>
+            <div class="field-group">
+              <label class="field-label" for="profile-email">Email</label>
+              <input
+                id="profile-email"
+                name="email"
+                type="email"
+                class="text-input"
+                autocomplete="email"
+                disabled
+              >
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="profile-contact">Contact number</label>
+              <input
+                id="profile-contact"
+                name="contactNumber"
+                type="text"
+                class="text-input"
+              >
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="profile-address">Address</label>
+              <textarea
+                id="profile-address"
+                name="address"
+                rows="3"
+                class="text-input"
+              ></textarea>
+            </div>
+
+            <div class="profile-actions">
+              <button class="primary-button" type="submit">
+                Save changes
+              </button>
+            </div>
+          </form>
         </div>
       </section>
-
-      <a class="cta-strip" href="https://www.nationalbookstore.com/" target="_blank" rel="noreferrer">
-        Access National Book Store Website
-      </a>
     </main>
   </div>
 
-  <script type="module" src="script.js"></script>
   <script type="module" src="auth.js"></script>
+  <script type="module" src="profile.js"></script>
 </body>
 </html>
