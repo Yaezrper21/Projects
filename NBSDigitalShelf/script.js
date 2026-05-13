@@ -412,7 +412,9 @@ function renderSearchResults(books) {
       .forEach((button) => {
         button.addEventListener("click", async () => {
           const profile = await window.nbsShelfData?.getCurrentUser();
-          const bookId = Number(button.dataset.openBook);
+          const bookId = button.dataset.openBook; // keep as string
+          if (!bookId) return;
+
           if (!profile) {
             const params = new URLSearchParams({ next: `book-${bookId}` });
             window.location.href = `signup.html?${params.toString()}`;
