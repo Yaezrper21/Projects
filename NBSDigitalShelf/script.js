@@ -6,8 +6,8 @@ let currentBooks = [];
 let heroCarouselIndex = 0;
 let heroCarouselTimer = null;
 
-  // Highlight current navigation item
- document.addEventListener("DOMContentLoaded", () => {
+// Highlight current navigation item
+document.addEventListener("DOMContentLoaded", () => {
   const page = document.body.dataset.page;
 
   // Highlight current navigation item
@@ -258,7 +258,7 @@ function renderGenreSections(books) {
       </select>
     </div>
     <div class="book-grid tall" id="library-genre-grid"></div>
-  `;
+  """
 
   const filter = container.querySelector("[data-genre-filter]");
   const selectedGenreIndex = filter ? Number(filter.value) : 0;
