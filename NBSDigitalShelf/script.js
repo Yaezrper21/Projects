@@ -258,7 +258,7 @@ function renderGenreSections(books) {
       </select>
     </div>
     <div class="book-grid tall" id="library-genre-grid"></div>
-  """
+  `;
 
   const filter = container.querySelector("[data-genre-filter]");
   const selectedGenreIndex = filter ? Number(filter.value) : 0;
