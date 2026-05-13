@@ -1,128 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NBS Digital Shelf - Profile</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=League+Spartan:wght@500;600;700;800&display=swap"
-    rel="stylesheet"
-  >
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body data-page="profile">
   <div class="site-shell">
     <header class="topbar">
-      <a class="brand" href="index.html">NBS Digital Shelf</a>
+      <a class="brand" href="index.html">NBS DIGITAL SHELF</a>
       <nav class="main-nav">
-        <a class="nav-link" data-page="home" href="index.html">Home</a>
-        <a class="nav-link" data-page="library" href="library.html">Library</a>
-        <a class="nav-link" data-page="topup" href="topup.html">Top-Up</a>
-        <a class="nav-link" data-page="orders" href="order.html">Order</a>
-        <a class="nav-link" data-page="search" href="search.html">Search</a>
-        <a class="nav-link" data-page="profile" href="profile.html">Profile</a>
-        <a class="nav-link" data-page="admin" href="admin.html">Admin Dashboard</a>
-        <a class="nav-link" data-page="super-admin" href="super-admin.html">Super Admin</a>
-        <a class="nav-link" data-page="login" href="login.html">Login</a>
-        <a class="nav-link" data-page="signup" href="signup.html">Sign Up</a>
+        <a class="nav-link" href="admin.html">BOOK MANAGEMENT</a>
+        <a class="nav-link" href="admin.html#announcements">ANNOUNCEMENTS</a>
+        <a class="nav-link is-active" href="profile.html">PROFILE</a>
       </nav>
     </header>
 
     <main>
-      <section class="session-banner panel" data-session-banner></section>
-
       <section class="panel profile-panel">
-        <p class="panel-title">My Profile</p>
+        <p class="panel-title">PROFILE</p>
         <p class="feedback-strip align-left" data-profile-feedback></p>
 
-        <div class="profile-layout">
-          <!-- Avatar -->
-          <div class="profile-avatar-block">
+        <!-- Outer box -->
+        <div class="profile-box">
+
+          <!-- Avatar section -->
+          <div class="profile-section profile-section--avatar">
+            <p class="profile-section-title">PROFILE AVATAR</p>
             <div class="profile-avatar-frame">
               <img
                 src=""
                 alt="Profile avatar"
                 class="profile-avatar-image"
                 data-profile-avatar
-              >
-              <div class="profile-avatar-fallback" data-profile-avatar-fallback>NB</div>
+              />
             </div>
 
-            <form data-profile-avatar-form>
-              <label class="field-label" for="avatar">Change avatar</label>
+            <form class="profile-avatar-form" data-profile-avatar-form>
               <input
-                id="avatar"
-                name="avatar"
                 type="file"
+                name="avatar"
                 accept="image/*"
                 class="file-input"
-              >
-              <button class="primary-button compact" type="submit">
-                Upload Avatar
+              />
+              <button type="submit" class="primary-button compact">
+                Upload
               </button>
             </form>
           </div>
 
-          <!-- Info / edit form -->
-          <form class="profile-form" data-profile-form>
-            <div class="field-group">
-              <label class="field-label" for="profile-username">Username</label>
+          <!-- Info section -->
+          <form class="profile-section profile-section--info" data-profile-form>
+            <div class="profile-field-row">
+              <span class="profile-label">USERNAME:</span>
               <input
-                id="profile-username"
+                type="text"
                 name="username"
-                type="text"
-                class="text-input"
-                autocomplete="name"
-              >
+                class="profile-input"
+                data-profile-username
+              />
             </div>
 
-            <div class="field-group">
-              <label class="field-label" for="profile-email">Email</label>
+            <div class="profile-field-row">
+              <span class="profile-label">EMAIL ADDRESS:</span>
               <input
-                id="profile-email"
-                name="email"
                 type="email"
-                class="text-input"
-                autocomplete="email"
+                name="email"
+                class="profile-input"
+                data-profile-email
                 disabled
-              >
+              />
             </div>
 
-            <div class="field-group">
-              <label class="field-label" for="profile-contact">Contact number</label>
+            <div class="profile-field-row">
+              <span class="profile-label">CONTACT NUMBER:</span>
               <input
-                id="profile-contact"
-                name="contactNumber"
                 type="text"
-                class="text-input"
-              >
+                name="contactNumber"
+                class="profile-input"
+                data-profile-contact
+              />
             </div>
 
-            <div class="field-group">
-              <label class="field-label" for="profile-address">Address</label>
+            <div class="profile-field-row">
+              <span class="profile-label">ADDRESS:</span>
               <textarea
-                id="profile-address"
                 name="address"
-                rows="3"
-                class="text-input"
+                rows="2"
+                class="profile-input"
+                data-profile-address
               ></textarea>
             </div>
 
+            <div class="profile-field-row">
+              <span class="profile-label">CHANGE PASSWORD:</span>
+              <a href="login.html" class="profile-input profile-link">
+                Go to password reset
+              </a>
+            </div>
+
             <div class="profile-actions">
-              <button class="primary-button" type="submit">
-                Save changes
+              <button type="submit" class="primary-button">
+                Save profile
               </button>
             </div>
           </form>
         </div>
+
+        <button
+          class="primary-button profile-nbs-button"
+          type="button"
+          onclick="window.open('https://www.nationalbookstore.com/', '_blank')"
+        >
+          ACCESS NATIONAL BOOKSTORE WEBSITE
+        </button>
       </section>
     </main>
   </div>
 
-  <script type="module" src="auth.js"></script>
   <script type="module" src="profile.js"></script>
 </body>
 </html>
