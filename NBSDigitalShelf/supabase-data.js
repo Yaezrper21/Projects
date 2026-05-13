@@ -39,9 +39,11 @@ function normalizeProfile(profile, session) {
     contactNumber: profile.contact_number || "",
     address: profile.address || "",
     avatarPath: profile.avatar_path || "",
-    avatarUrl: profile.avatar_path ? getPublicBucketUrl(STORAGE_BUCKETS.profileAvatars, profile.avatar_path) : "",
+    avatarUrl: profile.avatar_path
+      ? getPublicBucketUrl(STORAGE_BUCKETS.profileAvatars, profile.avatar_path)
+      : "",
     authType: session?.user?.app_metadata?.provider || "password",
-    createdAt: profile.created_at || ""
+    createdAt: profile.created_at || "",
   };
 }
 
@@ -53,7 +55,7 @@ async function ensureProfileRow(session) {
     email: session.user.email || "",
     username: usernameFromUser(session.user),
     contact_number: session.user.user_metadata?.contact_number || "",
-    address: session.user.user_metadata?.address || ""
+    address: session.user.user_metadata?.address || "",
   };
 
   const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
@@ -76,7 +78,12 @@ export async function getCurrentProfile(force = false) {
   }
 
   await ensureProfileRow(session);
-  const { data, error } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", session.user.id)
+    .single();
+
   throwIfError(error, "Unable to load the current profile.");
 
   cachedProfile = normalizeProfile(data, session);
@@ -98,9 +105,9 @@ export async function signUpWithPassword({ username, email, password, contactNum
       data: {
         username,
         contact_number: contactNumber,
-        address
-      }
-    }
+        address,
+      },
+    },
   });
   throwIfError(error, "Unable to create the account.");
   cachedProfile = null;
@@ -111,8 +118,8 @@ export async function signInWithOAuth(provider, next = "index.html") {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: getLoginRedirectUrl(next)
-    }
+      redirectTo: getLoginRedirectUrl(next),
+    },
   });
   throwIfError(error, `Unable to start ${getProviderLabel(provider)} sign in.`);
   return data;
@@ -134,7 +141,9 @@ function sortChapters(chapters) {
 }
 
 function mapBookRecord(book, chapters, views, favorites, currentProfile) {
-  const bookChapters = sortChapters(chapters.filter((chapter) => chapter.book_id === book.id));
+  const bookChapters = sortChapters(
+    chapters.filter((chapter) => chapter.book_id === book.id)
+  );
   const bookViews = views.filter((view) => view.book_id === book.id);
   const bookFavorites = favorites.filter((favorite) => favorite.book_id === book.id);
   const todayKey = getCurrentDayKey();
@@ -145,16 +154,24 @@ function mapBookRecord(book, chapters, views, favorites, currentProfile) {
     genre: book.genre,
     description: book.description,
     imagePath: book.cover_path || "",
-    imageUrl: book.cover_path ? getPublicBucketUrl(STORAGE_BUCKETS.bookCovers, book.cover_path) : "",
-    imageDataUrl: book.cover_path ? getPublicBucketUrl(STORAGE_BUCKETS.bookCovers, book.cover_path) : "",
+    imageUrl: book.cover_path
+      ? getPublicBucketUrl(STORAGE_BUCKETS.bookCovers, book.cover_path)
+      : "",
+    imageDataUrl: book.cover_path
+      ? getPublicBucketUrl(STORAGE_BUCKETS.bookCovers, book.cover_path)
+      : "",
     createdAt: book.created_at,
     updatedAt: book.updated_at,
     chapterCount: bookChapters.length,
     lockedCount: bookChapters.filter((chapter) => chapter.is_paid).length,
     totalViews: bookViews.length,
-    todayViews: bookViews.filter((view) => String(view.created_at || "").slice(0, 10) === todayKey).length,
+    todayViews: bookViews.filter(
+      (view) => String(view.created_at || "").slice(0, 10) === todayKey
+    ).length,
     favoriteCount: bookFavorites.length,
-    isFavorite: Boolean(currentProfile && bookFavorites.some((favorite) => favorite.profile_id === currentProfile.id)),
+    isFavorite: Boolean(
+      currentProfile && bookFavorites.some((favorite) => favorite.profile_id === currentProfile.id)
+    ),
     chapters: bookChapters.map((chapter) => ({
       id: chapter.id,
       title: chapter.title,
@@ -162,15 +179,18 @@ function mapBookRecord(book, chapters, views, favorites, currentProfile) {
       filePath: chapter.file_path,
       chapterOrder: chapter.chapter_order,
       createdAt: chapter.created_at,
-      updatedAt: chapter.updated_at
-    }))
+      updatedAt: chapter.updated_at,
+    })),
   };
 }
 
 async function fetchBookData(bookIds = null) {
   const currentProfilePromise = getCurrentProfile();
 
-  const booksQuery = supabase.from("books").select("*").order("created_at", { ascending: false });
+  const booksQuery = supabase
+    .from("books")
+    .select("*")
+    .order("created_at", { ascending: false });
   const chaptersQuery = supabase.from("chapters").select("*");
   const viewsQuery = supabase.from("book_views").select("book_id, created_at");
   const favoritesQuery = supabase.from("favorites").select("book_id, profile_id");
@@ -182,13 +202,14 @@ async function fetchBookData(bookIds = null) {
     favoritesQuery.in("book_id", bookIds);
   }
 
-  const [currentProfile, booksRes, chaptersRes, viewsRes, favoritesRes] = await Promise.all([
-    currentProfilePromise,
-    booksQuery,
-    chaptersQuery,
-    viewsQuery,
-    favoritesQuery
-  ]);
+  const [currentProfile, booksRes, chaptersRes, viewsRes, favoritesRes] =
+    await Promise.all([
+      currentProfilePromise,
+      booksQuery,
+      chaptersQuery,
+      viewsQuery,
+      favoritesQuery,
+    ]);
 
   throwIfError(booksRes.error, "Unable to load books.");
   throwIfError(chaptersRes.error, "Unable to load chapters.");
@@ -200,7 +221,9 @@ async function fetchBookData(bookIds = null) {
   const views = viewsRes.data || [];
   const favorites = favoritesRes.data || [];
 
-  return books.map((book) => mapBookRecord(book, chapters, views, favorites, currentProfile));
+  return books.map((book) =>
+    mapBookRecord(book, chapters, views, favorites, currentProfile)
+  );
 }
 
 export async function getBooks() {
@@ -300,7 +323,7 @@ export async function getChapterAccess(bookId, chapterId) {
   return {
     canRead: chapter.canRead,
     requiresPurchase: chapter.requiresPurchase,
-    isGuest: !profile
+    isGuest: !profile,
   };
 }
 
@@ -318,7 +341,7 @@ export async function trackPageView(pageName) {
   const profile = await getCurrentProfile();
   const { error } = await supabase.from("page_views").insert({
     page_name: pageName,
-    viewer_id: profile?.id || null
+    viewer_id: profile?.id || null,
   });
 
   throwIfError(error, "Unable to track page view.");
@@ -336,7 +359,11 @@ export async function incrementBookView(bookId) {
 export async function toggleFavorite(bookId) {
   const profile = await getCurrentProfile();
   if (!profile) {
-    return { ok: false, status: 401, message: "Please log in first to save books." };
+    return {
+      ok: false,
+      status: 401,
+      message: "Please log in first to save books.",
+    };
   }
 
   const { data: existing, error: existingError } = await supabase
@@ -361,7 +388,7 @@ export async function toggleFavorite(bookId) {
 
   const { error } = await supabase.from("favorites").insert({
     profile_id: profile.id,
-    book_id: bookId
+    book_id: bookId,
   });
 
   throwIfError(error, "Unable to save the book.");
@@ -372,18 +399,25 @@ export async function getMyBooks() {
   const profile = await getCurrentProfile();
   if (!profile) throw new Error("Please log in first to view My Books.");
 
-  const { data, error } = await supabase.from("favorites").select("book_id").eq("profile_id", profile.id);
+  const { data, error } = await supabase
+    .from("favorites")
+    .select("book_id")
+    .eq("profile_id", profile.id);
   throwIfError(error, "Unable to load My Books.");
 
   const bookIds = (data || []).map((item) => item.book_id);
   if (!bookIds.length) return [];
 
   const books = await fetchBookData(bookIds);
-  return books.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  return books.sort(
+    (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+  );
 }
 
 export async function downloadChapterText(filePath) {
-  const { data, error } = await supabase.storage.from(STORAGE_BUCKETS.chapterFiles).download(filePath);
+  const { data, error } = await supabase.storage
+    .from(STORAGE_BUCKETS.chapterFiles)
+    .download(filePath);
   throwIfError(error, "Unable to load the chapter text.");
   return data.text();
 }
@@ -391,7 +425,11 @@ export async function downloadChapterText(filePath) {
 export async function purchaseChapter(bookId, chapterId) {
   const profile = await getCurrentProfile();
   if (!profile) {
-    return { ok: false, status: 401, message: "Please log in or sign up before buying locked chapters." };
+    return {
+      ok: false,
+      status: 401,
+      message: "Please log in or sign up before buying locked chapters.",
+    };
   }
 
   const book = await getBookById(bookId);
@@ -399,9 +437,15 @@ export async function purchaseChapter(bookId, chapterId) {
 
   const chapter = (book.chapters || []).find((item) => item.id === chapterId);
   if (!chapter) return { ok: false, message: "Chapter not found." };
-  if (!chapter.isPaid) return { ok: true, message: "This chapter is already free to read." };
-  if (isAdminRole(profile.role)) return { ok: true, message: "Admin accounts can read buyable chapters without purchasing." };
-  if (chapter.purchased) return { ok: true, message: "You already bought this chapter." };
+  if (!chapter.isPaid)
+    return { ok: true, message: "This chapter is already free to read." };
+  if (isAdminRole(profile.role))
+    return {
+      ok: true,
+      message: "Admin accounts can read buyable chapters without purchasing.",
+    };
+  if (chapter.purchased)
+    return { ok: true, message: "You already bought this chapter." };
 
   const { error } = await supabase.from("orders").insert({
     profile_id: profile.id,
@@ -410,16 +454,20 @@ export async function purchaseChapter(bookId, chapterId) {
     item_name: `${book.title} - ${chapter.title}`,
     item_type: "chapter",
     status: "Purchased",
-    order_number: makeOrderNumber()
+    order_number: makeOrderNumber(),
   });
 
   throwIfError(error, "Unable to save the purchase.");
-  return { ok: true, message: `You bought ${chapter.title}. It is now unlocked in your account.` };
+  return {
+    ok: true,
+    message: `You bought ${chapter.title}. It is now unlocked in your account.`,
+  };
 }
 
 export async function createTopupOrder(amount) {
   const profile = await getCurrentProfile();
-  if (!profile) throw new Error("Please log in or sign up before buying DigiCoin.");
+  if (!profile)
+    throw new Error("Please log in or sign up before buying DigiCoin.");
   if (!amount || amount < 1) throw new Error("Enter a valid DigiCoin amount.");
 
   const { error } = await supabase.from("orders").insert({
@@ -427,7 +475,7 @@ export async function createTopupOrder(amount) {
     item_name: `${amount} DigiCoin Top-Up`,
     item_type: "topup",
     status: "Pending",
-    order_number: makeOrderNumber()
+    order_number: makeOrderNumber(),
   });
 
   throwIfError(error, "Unable to save the top-up request.");
@@ -436,7 +484,10 @@ export async function createTopupOrder(amount) {
 
 export async function createPhysicalBookOrder(bookId, formData) {
   const profile = await getCurrentProfile();
-  if (!profile) throw new Error("Please log in or sign up before requesting a physical copy.");
+  if (!profile)
+    throw new Error(
+      "Please log in or sign up before requesting a physical copy."
+    );
 
   const {
     fullName,
@@ -456,7 +507,9 @@ export async function createPhysicalBookOrder(bookId, formData) {
     profile_id: profile.id,
     book_id: bookId || null,
     chapter_id: null,
-    item_name: `Physical copy request for ${formData.bookTitle || "a book"}`,
+    item_name: `Physical copy request for ${
+      formData.bookTitle || "a book"
+    }`,
     item_type: "book",
     status: "Pending",
     order_number: makeOrderNumber(),
@@ -481,7 +534,8 @@ export async function createPhysicalBookOrder(bookId, formData) {
 
 export async function getOrdersForCurrentUser() {
   const profile = await getCurrentProfile();
-  if (!profile) throw new Error("Log in to see your purchases and top-up requests.");
+  if (!profile)
+    throw new Error("Log in to see your purchases and top-up requests.");
 
   const { data, error } = await supabase
     .from("orders")
@@ -534,7 +588,7 @@ export async function updateOwnProfile({ username, contactNumber, address }) {
     .update({
       username,
       contact_number: contactNumber,
-      address
+      address,
     })
     .eq("id", profile.id)
     .select("*")
@@ -550,7 +604,10 @@ export async function uploadProfileAvatar(file) {
   if (!profile) throw new Error("Please log in first.");
   if (!file) throw new Error("Profile picture is required.");
 
-  const path = buildStoragePath(profile.id, `avatar-${Date.now()}.${fileExtension(file.name)}`);
+  const path = buildStoragePath(
+    profile.id,
+    `avatar-${Date.now()}.${fileExtension(file.name)}`
+  );
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKETS.profileAvatars)
     .upload(path, file, { upsert: true });
@@ -630,9 +687,9 @@ export async function getAdminDashboardData() {
     supabase.from("orders").select("id"),
     supabase.from("announcements").select("id, title"),
     supabase.from("page_views").select("id"),
-    supabase.from("profiles").select(
-      "id, username, email, role, contact_number, address"
-    ),
+    supabase
+      .from("profiles")
+      .select("id, username, email, role, contact_number, address"),
     getBooks(),
   ]);
 
@@ -705,11 +762,20 @@ export async function updateAnnouncement(id, title) {
 export async function deleteAnnouncement(announcementId) {
   await requireAdminOrSuperAdminProfile();
 
-  const { error } = await supabase.from("announcements").delete().eq("id", announcementId);
+  const { error } = await supabase
+    .from("announcements")
+    .delete()
+    .eq("id", announcementId);
   throwIfError(error, "Unable to remove the announcement.");
 }
 
-export async function saveBook({ id = "", title, genre, description, imageFile = null }) {
+export async function saveBook({
+  id = "",
+  title,
+  genre,
+  description,
+  imageFile = null,
+}) {
   const profile = await requireAdminOrSuperAdminProfile();
   if (!title || !genre || !description) {
     throw new Error("Book title, genre, and description are required.");
@@ -739,7 +805,10 @@ export async function saveBook({ id = "", title, genre, description, imageFile =
   }
 
   if (imageFile) {
-    const coverPath = buildStoragePath(bookRow.id, `cover-${Date.now()}.${fileExtension(imageFile.name)}`);
+    const coverPath = buildStoragePath(
+      bookRow.id,
+      `cover-${Date.now()}.${fileExtension(imageFile.name)}`
+    );
     const { error: uploadError } = await supabase.storage
       .from(STORAGE_BUCKETS.bookCovers)
       .upload(coverPath, imageFile, { upsert: true });
@@ -770,16 +839,23 @@ export async function getAdminBookById(bookId) {
     chapters: await Promise.all(
       (book.chapters || []).map(async (chapter) => ({
         ...chapter,
-        text: await downloadChapterText(chapter.filePath)
+        text: await downloadChapterText(chapter.filePath),
       }))
-    )
+    ),
   };
 }
 
-export async function saveChapter({ bookId, chapterId = "", title, text, accessType = "free" }) {
+export async function saveChapter({
+  bookId,
+  chapterId = "",
+  title,
+  text,
+  accessType = "free",
+}) {
   await requireAdminOrSuperAdminProfile();
   if (!bookId) throw new Error("Select a valid book first.");
-  if (!title || !text) throw new Error("Chapter title and chapter text are required.");
+  if (!title || !text)
+    throw new Error("Chapter title and chapter text are required.");
 
   const { data: currentChapters, error: chaptersError } = await supabase
     .from("chapters")
@@ -789,18 +865,23 @@ export async function saveChapter({ bookId, chapterId = "", title, text, accessT
 
   throwIfError(chaptersError, "Unable to load the chapter list.");
 
-  const existing = (currentChapters || []).find((item) => item.id === chapterId) || null;
+  const existing =
+    (currentChapters || []).find((item) => item.id === chapterId) || null;
   const nextChapterId = chapterId || crypto.randomUUID();
   const nextOrder = existing
     ? Number(existing.chapter_order || 1)
     : (currentChapters || []).length + 1;
 
-  const filePath = existing?.file_path || buildStoragePath(bookId, `${nextChapterId}.txt`);
+  const filePath =
+    existing?.file_path || buildStoragePath(bookId, `${nextChapterId}.txt`);
   const chapterFile = createTextFile(text, `${nextChapterId}.txt`);
 
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKETS.chapterFiles)
-    .upload(filePath, chapterFile, { upsert: true, contentType: "text/plain;charset=utf-8" });
+    .upload(filePath, chapterFile, {
+      upsert: true,
+      contentType: "text/plain;charset=utf-8",
+    });
 
   throwIfError(uploadError, "Unable to upload the chapter file.");
 
@@ -810,7 +891,7 @@ export async function saveChapter({ bookId, chapterId = "", title, text, accessT
     title,
     file_path: filePath,
     is_paid: accessType === "paid",
-    chapter_order: nextOrder
+    chapter_order: nextOrder,
   };
 
   const { error } = existing
@@ -824,15 +905,24 @@ export async function saveChapter({ bookId, chapterId = "", title, text, accessT
 export async function deleteChapter(bookId, chapterId) {
   await requireAdminOrSuperAdminProfile();
 
-  const { data, error } = await supabase.from("chapters").select("*").eq("id", chapterId).single();
+  const { data, error } = await supabase
+    .from("chapters")
+    .select("*")
+    .eq("id", chapterId)
+    .single();
   throwIfError(error, "Unable to find the chapter.");
 
   if (data?.file_path) {
-    const { error: storageError } = await supabase.storage.from(STORAGE_BUCKETS.chapterFiles).remove([data.file_path]);
+    const { error: storageError } = await supabase.storage
+      .from(STORAGE_BUCKETS.chapterFiles)
+      .remove([data.file_path]);
     throwIfError(storageError, "Unable to remove the chapter file.");
   }
 
-  const { error: deleteError } = await supabase.from("chapters").delete().eq("id", chapterId);
+  const { error: deleteError } = await supabase
+    .from("chapters")
+    .delete()
+    .eq("id", chapterId);
   throwIfError(deleteError, "Unable to remove the chapter.");
 
   return getAdminBookById(bookId);
@@ -841,15 +931,22 @@ export async function deleteChapter(bookId, chapterId) {
 export async function deleteBook(bookId) {
   await requireAdminOrSuperAdminProfile();
 
-  const { data: book, error: bookError } = await supabase.from("books").select("*").eq("id", bookId).single();
+  const { data: book, error: bookError } = await supabase
+    .from("books")
+    .select("*")
+    .eq("id", bookId)
+    .single();
   throwIfError(bookError, "Unable to find the book.");
 
-  const { data: chapters, error: chaptersError } = await supabase.from("chapters").select("file_path").eq("book_id", bookId);
+  const { data: chapters, error: chaptersError } = await supabase
+    .from("chapters")
+    .select("file_path")
+    .eq("book_id", bookId);
   throwIfError(chaptersError, "Unable to load the chapter files.");
 
   const pathsToDelete = [
     ...(book?.cover_path ? [book.cover_path] : []),
-    ...((chapters || []).map((item) => item.file_path).filter(Boolean))
+    ...((chapters || []).map((item) => item.file_path).filter(Boolean)),
   ];
 
   if (pathsToDelete.length) {
@@ -857,12 +954,16 @@ export async function deleteBook(bookId) {
     const chapterPaths = pathsToDelete.filter((path) => path.endsWith(".txt"));
 
     if (coverPaths.length) {
-      const { error } = await supabase.storage.from(STORAGE_BUCKETS.bookCovers).remove(coverPaths);
+      const { error } = await supabase.storage
+        .from(STORAGE_BUCKETS.bookCovers)
+        .remove(coverPaths);
       throwIfError(error, "Unable to remove the cover picture.");
     }
 
     if (chapterPaths.length) {
-      const { error } = await supabase.storage.from(STORAGE_BUCKETS.chapterFiles).remove(chapterPaths);
+      const { error } = await supabase.storage
+        .from(STORAGE_BUCKETS.chapterFiles)
+        .remove(chapterPaths);
       throwIfError(error, "Unable to remove the chapter files.");
     }
   }
@@ -871,7 +972,13 @@ export async function deleteBook(bookId) {
   throwIfError(error, "Unable to remove the book.");
 }
 
-export async function updateMemberProfile({ id, username, role, contactNumber, address }) {
+export async function updateMemberProfile({
+  id,
+  username,
+  role,
+  contactNumber,
+  address,
+}) {
   await requireSuperAdminProfile();
   if (!id) throw new Error("Select a valid member first.");
   if (!username) throw new Error("Username is required.");
@@ -882,14 +989,16 @@ export async function updateMemberProfile({ id, username, role, contactNumber, a
       username,
       role,
       contact_number: contactNumber,
-      address
+      address,
     })
     .eq("id", id)
     .select("*")
     .single();
 
   throwIfError(error, "Unable to update the member profile.");
-  return normalizeProfile(data, { user: { app_metadata: { provider: "password" }, email: data.email } });
+  return normalizeProfile(data, {
+    user: { app_metadata: { provider: "password" }, email: data.email },
+  });
 }
 
 export async function waitForSessionAfterRedirect(retries = 12) {
@@ -938,6 +1047,6 @@ if (typeof window !== "undefined") {
     trackPageView,
     createTopupOrder,
     createPhysicalBookOrder,
-    waitForSessionAfterRedirect
+    waitForSessionAfterRedirect,
   };
 }
