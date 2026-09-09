@@ -1,0 +1,18 @@
+# Defense in depth: uploaded files are validated by extension + MIME type
+# in includes/functions.php, but this ensures nothing in this directory
+# can ever be executed as PHP even if a disguised file got through.
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|phar)$">
+    Require all denied
+</FilesMatch>
+
+# Nginx doesn't read .htaccess — if you're on Nginx instead of Apache,
+# add this to your server block covering /assets/uploads/ instead:
+#   location ~* /assets/uploads/.*\.php$ { deny all; }
